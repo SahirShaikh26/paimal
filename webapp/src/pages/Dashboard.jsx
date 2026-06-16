@@ -58,6 +58,7 @@ export default function Dashboard() {
           {data?.by_engineer?.length > 0 && (
             <div style={card}>
               <h2 style={{ fontSize:16, fontWeight:600, marginBottom:12 }}>Engineer Performance</h2>
+              <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
                 <thead>
                   <tr style={{ borderBottom:'2px solid #e2e8f0' }}>
@@ -77,6 +78,7 @@ export default function Dashboard() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
         </>

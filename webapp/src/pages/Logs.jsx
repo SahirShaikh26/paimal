@@ -56,43 +56,45 @@ export default function Logs() {
       </div>
 
       {isLoading ? <p>Loading…</p> : (
-        <table style={s.table}>
-          <thead>
-            <tr>
-              {['Date','Engineer','Customer','Activity','Hours','Billing','Status','Notes',''].map(h => (
-                <th key={h} style={s.th}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data?.data?.length === 0 && (
-              <tr><td colSpan={9} style={{ ...s.td, textAlign:'center', color:'#94a3b8', padding:32 }}>No logs found</td></tr>
-            )}
-            {data?.data?.map(log => (
-              <tr key={log.id}>
-                <td style={s.td}>{format(new Date(log.date), 'dd MMM yy')}</td>
-                <td style={s.td}>{log.engineer_name}</td>
-                <td style={s.td}>{log.customer_name || '—'}</td>
-                <td style={s.td}>
-                  <span style={{ ...s.badge, background:activityColors[log.activity_code]||'#f1f5f9', color:activityText[log.activity_code]||'#475569' }}>
-                    {log.activity_code}
-                  </span>
-                </td>
-                <td style={s.td}>{log.hours ?? '—'}</td>
-                <td style={s.td}>{log.billing_inr > 0 ? `₹${Number(log.billing_inr).toLocaleString('en-IN')}` : '—'}</td>
-                <td style={s.td}>{log.status || '—'}</td>
-                <td style={{ ...s.td, maxWidth:200, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                  {log.notes || '—'}
-                </td>
-                <td style={s.td}>
-                  {['Director','Manager'].includes(user?.role) && (
-                    <button style={s.delBtn} onClick={()=>handleDelete(log.id)}>Del</button>
-                  )}
-                </td>
+        <div style={{ overflowX:'auto' }}>
+          <table style={s.table}>
+            <thead>
+              <tr>
+                {['Date','Engineer','Customer','Activity','Hours','Billing','Status','Notes',''].map(h => (
+                  <th key={h} style={s.th}>{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data?.data?.length === 0 && (
+                <tr><td colSpan={9} style={{ ...s.td, textAlign:'center', color:'#94a3b8', padding:32 }}>No logs found</td></tr>
+              )}
+              {data?.data?.map(log => (
+                <tr key={log.id}>
+                  <td style={s.td}>{format(new Date(log.date), 'dd MMM yy')}</td>
+                  <td style={s.td}>{log.engineer_name}</td>
+                  <td style={s.td}>{log.customer_name || '—'}</td>
+                  <td style={s.td}>
+                    <span style={{ ...s.badge, background:activityColors[log.activity_code]||'#f1f5f9', color:activityText[log.activity_code]||'#475569' }}>
+                      {log.activity_code}
+                    </span>
+                  </td>
+                  <td style={s.td}>{log.hours ?? '—'}</td>
+                  <td style={s.td}>{log.billing_inr > 0 ? `₹${Number(log.billing_inr).toLocaleString('en-IN')}` : '—'}</td>
+                  <td style={s.td}>{log.status || '—'}</td>
+                  <td style={{ ...s.td, maxWidth:200, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                    {log.notes || '—'}
+                  </td>
+                  <td style={s.td}>
+                    {['Director','Manager'].includes(user?.role) && (
+                      <button style={s.delBtn} onClick={()=>handleDelete(log.id)}>Del</button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

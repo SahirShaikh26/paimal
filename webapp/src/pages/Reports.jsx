@@ -84,43 +84,47 @@ export default function Reports() {
 
           <div style={card}>
             <h3 style={{ fontSize:16, fontWeight:600, marginBottom:12 }}>By Engineer</h3>
-            <table style={{ width:'100%', borderCollapse:'collapse' }}>
-              <thead>
-                <tr>
-                  {['Engineer','Logs','Hours','Billing (₹)','Cost (₹)'].map(h=><th key={h} style={s.th}>{h}</th>)}
-                </tr>
-              </thead>
-              <tbody>
-                {(data?.by_engineer||[]).map(e=>(
-                  <tr key={e.engineer_id}>
-                    <td style={{ ...s.td, fontWeight:600 }}>{e.name}</td>
-                    <td style={s.td}>{e.logs}</td>
-                    <td style={s.td}>{Number(e.hours||0).toFixed(1)}</td>
-                    <td style={s.td}>₹{Number(e.billing||0).toLocaleString('en-IN')}</td>
-                    <td style={s.td}>—</td>
+            <div style={{ overflowX:'auto' }}>
+              <table style={{ width:'100%', borderCollapse:'collapse' }}>
+                <thead>
+                  <tr>
+                    {['Engineer','Logs','Hours','Billing (₹)','Cost (₹)'].map(h=><th key={h} style={s.th}>{h}</th>)}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {(data?.by_engineer||[]).map(e=>(
+                    <tr key={e.engineer_id}>
+                      <td style={{ ...s.td, fontWeight:600 }}>{e.name}</td>
+                      <td style={s.td}>{e.logs}</td>
+                      <td style={s.td}>{Number(e.hours||0).toFixed(1)}</td>
+                      <td style={s.td}>₹{Number(e.billing||0).toLocaleString('en-IN')}</td>
+                      <td style={s.td}>—</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div style={card}>
             <h3 style={{ fontSize:16, fontWeight:600, marginBottom:12 }}>Monthly Breakdown</h3>
-            <table style={{ width:'100%', borderCollapse:'collapse' }}>
-              <thead>
-                <tr>{['Month','Logs','Hours','Billing (₹)'].map(h=><th key={h} style={s.th}>{h}</th>)}</tr>
-              </thead>
-              <tbody>
-                {(data?.by_month||[]).map(m=>(
-                  <tr key={m.month}>
-                    <td style={{ ...s.td, fontWeight:600 }}>{m.month}</td>
-                    <td style={s.td}>{m.logs}</td>
-                    <td style={s.td}>{Number(m.hours||0).toFixed(1)}</td>
-                    <td style={s.td}>₹{Number(m.billing||0).toLocaleString('en-IN')}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div style={{ overflowX:'auto' }}>
+              <table style={{ width:'100%', borderCollapse:'collapse' }}>
+                <thead>
+                  <tr>{['Month','Logs','Hours','Billing (₹)'].map(h=><th key={h} style={s.th}>{h}</th>)}</tr>
+                </thead>
+                <tbody>
+                  {(data?.by_month||[]).map(m=>(
+                    <tr key={m.month}>
+                      <td style={{ ...s.td, fontWeight:600 }}>{m.month}</td>
+                      <td style={s.td}>{m.logs}</td>
+                      <td style={s.td}>{Number(m.hours||0).toFixed(1)}</td>
+                      <td style={s.td}>₹{Number(m.billing||0).toLocaleString('en-IN')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}

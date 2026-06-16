@@ -16,7 +16,7 @@ const s = {
   meta:  { fontSize:13, color:'#64748b', marginBottom:3 },
   btn:   { padding:'8px 16px', background:'#2563eb', color:'#fff', border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
   modal: { position:'fixed', inset:0, background:'rgba(0,0,0,.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 },
-  mcard: { background:'#fff', borderRadius:12, padding:32, width:440 },
+  mcard: { background:'#fff', borderRadius:12, padding:32, width:'min(440px, calc(100vw - 32px))', maxHeight:'90vh', overflowY:'auto' },
   label: { display:'block', fontSize:13, fontWeight:600, color:'#374151', marginBottom:5 },
   input: { width:'100%', padding:'9px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:14, marginBottom:12 },
   select:{ width:'100%', padding:'9px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:14, marginBottom:12 },

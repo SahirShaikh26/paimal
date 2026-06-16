@@ -24,7 +24,7 @@ export default function Analytics() {
     filter:{ display:'flex', gap:12, alignItems:'center', marginBottom:24, flexWrap:'wrap' },
     label: { fontSize:13, color:'#64748b' },
     input: { padding:'7px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:13 },
-    grid:  { display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 },
+    grid:  { display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:20, marginBottom:20 },
   };
 
   return (
@@ -87,6 +87,7 @@ export default function Analytics() {
           {/* Activity table */}
           <div style={card}>
             <h3 style={{ fontSize:15, fontWeight:600, marginBottom:12 }}>Activity Summary</h3>
+            <div style={{ overflowX:'auto' }}>
             <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
               <thead>
                 <tr style={{ borderBottom:'2px solid #e2e8f0' }}>
@@ -104,6 +105,7 @@ export default function Analytics() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </>
       )}

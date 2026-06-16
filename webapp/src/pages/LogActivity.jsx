@@ -21,7 +21,7 @@ const s = {
   page:  { maxWidth:640 },
   h1:    { fontSize:22, fontWeight:700, color:'#1e3a5f', marginBottom:24 },
   card:  { background:'#fff', borderRadius:10, padding:28, boxShadow:'0 1px 4px rgba(0,0,0,.08)' },
-  row:   { display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 },
+  row:   { display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))', gap:16, marginBottom:16 },
   group: { marginBottom:16 },
   label: { display:'block', fontSize:13, fontWeight:600, color:'#374151', marginBottom:5 },
   input: { width:'100%', padding:'9px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:14 },

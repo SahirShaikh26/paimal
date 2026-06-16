@@ -5,8 +5,8 @@ import { useAuth } from '../hooks/useAuth';
 import api from '../api/client';
 
 const s = {
-  page:    { minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#f0f4ff' },
-  card:    { background:'#fff', borderRadius:12, padding:40, width:420, boxShadow:'0 4px 24px rgba(0,0,0,.1)' },
+  page:    { minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#f0f4ff', padding:'20px 16px' },
+  card:    { background:'#fff', borderRadius:12, padding:40, width:'100%', maxWidth:420, boxShadow:'0 4px 24px rgba(0,0,0,.1)' },
   logo:    { textAlign:'center', fontSize:28, fontWeight:800, color:'#1e3a5f', marginBottom:8 },
   sub:     { textAlign:'center', color:'#64748b', fontSize:14, marginBottom:32 },
   label:   { display:'block', fontSize:13, fontWeight:600, color:'#374151', marginBottom:6 },
