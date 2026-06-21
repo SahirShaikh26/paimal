@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { LOGIN_URL, SIGNUP_URL } from '../config';
 
 export default function Footer() {
@@ -7,8 +8,9 @@ export default function Footer() {
         <div className="footer-inner">
           <div className="logo">⚡ FieldPilot</div>
           <div className="footer-links">
-            <a href="#features">Features</a>
-            <a href="#pricing">Pricing</a>
+            <a href="/#features">Features</a>
+            <Link to="/industries">Industries</Link>
+            <a href="/#pricing">Pricing</a>
             <a href={LOGIN_URL}>Log In</a>
             <a href={SIGNUP_URL}>Start Free Trial</a>
             <a href="/privacy.html">Privacy Policy</a>

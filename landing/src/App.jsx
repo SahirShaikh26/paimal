@@ -1,25 +1,18 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Nav from './components/Nav';
-import Hero from './components/Hero';
-import TrustStrip from './components/TrustStrip';
-import AIDigestSpotlight from './components/AIDigestSpotlight';
-import Features from './components/Features';
-import HowItWorks from './components/HowItWorks';
-import Pricing from './components/Pricing';
-import CtaBanner from './components/CtaBanner';
 import Footer from './components/Footer';
+import Home from './pages/Home';
+import Industries from './pages/Industries';
 
 export default function App() {
   return (
-    <>
+    <BrowserRouter>
       <Nav />
-      <Hero />
-      <TrustStrip />
-      <AIDigestSpotlight />
-      <Features />
-      <HowItWorks />
-      <Pricing />
-      <CtaBanner />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/industries" element={<Industries />} />
+      </Routes>
       <Footer />
-    </>
+    </BrowserRouter>
   );
 }
