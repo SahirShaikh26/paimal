@@ -62,14 +62,14 @@ export default function Logs() {
           <table style={s.table}>
             <thead>
               <tr>
-                {['Date','Engineer','Customer','Activity','Hours','Billing','Status','Notes','Photos',''].map(h => (
+                {['Date','Engineer','Customer','Activity','Mode','Hours','Bill?','Billing','Status','Notes','Photos',''].map(h => (
                   <th key={h} style={s.th}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {data?.data?.length === 0 && (
-                <tr><td colSpan={10} style={{ ...s.td, textAlign:'center', color:colors.textFaint, padding:32 }}>No logs found</td></tr>
+                <tr><td colSpan={12} style={{ ...s.td, textAlign:'center', color:colors.textFaint, padding:32 }}>No logs found</td></tr>
               )}
               {data?.data?.map(log => (
                 <tr key={log.id}>
@@ -85,7 +85,9 @@ export default function Logs() {
                       {log.activity_code}
                     </span>
                   </td>
-                  <td style={s.td}>{log.hours ?? '—'}</td>
+                  <td style={s.td}>{log.work_mode || '—'}</td>
+                  <td style={s.td}>{log.hours ?? '—'}{log.ticket_no ? <span style={{ display:'block', fontSize:10, color:colors.textFaint }}>{log.ticket_no}</span> : null}</td>
+                  <td style={s.td}>{log.billable === false ? '—' : '✓'}</td>
                   <td style={s.td}>{log.billing_inr > 0 ? `₹${Number(log.billing_inr).toLocaleString('en-IN')}` : '—'}</td>
                   <td style={s.td}>{log.status || '—'}</td>
                   <td style={{ ...s.td, maxWidth:200, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>

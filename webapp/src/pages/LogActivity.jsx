@@ -28,6 +28,7 @@ export default function LogActivity() {
   const { data: customers } = useQuery({ queryKey:['customers'], queryFn:()=>api.get('/customers').then(r=>r.data) });
   const { data: projects }  = useQuery({ queryKey:['projects'],  queryFn:()=>api.get('/projects').then(r=>r.data) });
   const { data: activityTypes } = useQuery({ queryKey:['activity-types'], queryFn:()=>api.get('/activity-types').then(r=>r.data) });
+  const { data: products } = useQuery({ queryKey:['products'], queryFn:()=>api.get('/products').then(r=>r.data) });
 
   const [form, setForm] = useState({
     date: format(new Date(), 'yyyy-MM-dd'),
@@ -36,7 +37,11 @@ export default function LogActivity() {
     project_id: '',
     query_type: '',
     product_type: '',
+    work_mode: '',
+    ticket_no: '',
     hours: '',
+    travel_hours: '',
+    billable: true,
     billing_inr: '',
     cost_inr: '',
     status: '',
@@ -99,8 +104,25 @@ export default function LogActivity() {
               <input style={s.input} value={form.query_type} onChange={set('query_type')} placeholder="e.g. Breakdown query" />
             </div>
             <div style={s.group}>
-              <label style={s.label}>Product Type</label>
-              <input style={s.input} value={form.product_type} onChange={set('product_type')} placeholder="e.g. CNC, Laser…" />
+              <label style={s.label}>Product / System</label>
+              <input style={s.input} list="product-list" value={form.product_type} onChange={set('product_type')} placeholder="e.g. Mitsubishi iQ-R PLC" />
+              <datalist id="product-list">
+                {products?.map((p) => <option key={p.id} value={p.name} />)}
+              </datalist>
+            </div>
+          </div>
+
+          <div style={s.row}>
+            <div style={s.group}>
+              <label style={s.label}>Work Mode</label>
+              <select style={s.select} value={form.work_mode} onChange={set('work_mode')}>
+                <option value="">Select…</option>
+                {['Office','Site','Remote'].map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+            <div style={s.group}>
+              <label style={s.label}>Ticket No <span style={{color:colors.textFaint,fontWeight:400}}>(if support work)</span></label>
+              <input style={s.input} value={form.ticket_no} onChange={set('ticket_no')} placeholder="e.g. TK-2026-0007" />
             </div>
           </div>
 
@@ -110,20 +132,28 @@ export default function LogActivity() {
               <input style={s.input} type="number" step="0.5" min="0" value={form.hours} onChange={set('hours')} placeholder="0.0" />
             </div>
             <div style={s.group}>
-              <label style={s.label}>Location</label>
-              <input style={s.input} value={form.location} onChange={set('location')} placeholder="City / Site name" />
+              <label style={s.label}>Travel Hours</label>
+              <input style={s.input} type="number" step="0.5" min="0" value={form.travel_hours} onChange={set('travel_hours')} placeholder="0.0" />
             </div>
           </div>
 
           <div style={s.row}>
             <div style={s.group}>
+              <label style={s.label}>Work Location</label>
+              <input style={s.input} value={form.location} onChange={set('location')} placeholder="City / Site name" />
+            </div>
+            <div style={s.group}>
               <label style={s.label}>Billing (₹)</label>
               <input style={s.input} type="number" min="0" value={form.billing_inr} onChange={set('billing_inr')} placeholder="0" />
             </div>
-            <div style={s.group}>
-              <label style={s.label}>Cost (₹)</label>
-              <input style={s.input} type="number" min="0" value={form.cost_inr} onChange={set('cost_inr')} placeholder="0" />
-            </div>
+          </div>
+
+          <div style={s.group}>
+            <label style={{ ...s.label, display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
+              <input type="checkbox" checked={form.billable} onChange={(e)=>setForm(f=>({...f, billable:e.target.checked}))} />
+              Billable to customer
+            </label>
+            <div style={{ fontSize:12, color:colors.textMuted, marginTop:2 }}>Cost is auto-calculated from your hourly rate; leave Billing blank if not billable.</div>
           </div>
 
           <div style={s.group}>

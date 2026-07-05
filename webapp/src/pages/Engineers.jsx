@@ -23,7 +23,7 @@ const s = {
   select:{ width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14, marginBottom:12 },
 };
 
-const EMPTY = { name:'', email:'', password:'', role:'Engineer', dept:'', reports_to:'' };
+const EMPTY = { name:'', email:'', password:'', role:'Engineer', dept:'', reports_to:'', job_title:'', cost_per_hour:'' };
 
 export default function Engineers() {
   const { user } = useAuth();
@@ -55,8 +55,10 @@ export default function Engineers() {
             <div key={e.id} style={s.card}>
               <span style={{ ...s.badge, background:ROLE_COLORS[e.role]||colors.bgAlt, color:ROLE_TEXT[e.role]||'#475569' }}>{e.role}</span>
               <div style={s.name}>{e.name}</div>
+              {e.job_title && <div style={s.meta}>🛠️ {e.job_title}</div>}
               <div style={s.meta}>✉️ {e.email}</div>
               {e.dept && <div style={s.meta}>🏢 {e.dept}</div>}
+              {Number(e.cost_per_hour) > 0 && <div style={s.meta}>💰 ₹{Number(e.cost_per_hour).toLocaleString('en-IN')}/hr</div>}
               <div style={{ ...s.meta, marginTop:8 }}>
                 <span style={{ padding:'2px 8px', borderRadius:20, fontSize:11, background:e.active?colors.greenBg:colors.redBg, color:e.active?colors.green:colors.red, fontWeight:600 }}>
                   {e.active ? 'Active' : 'Inactive'}
@@ -84,8 +86,17 @@ export default function Engineers() {
                 <option value="Manager">Manager</option>
                 <option value="Director">Director</option>
               </select>
+              <label style={s.label}>Job Title</label>
+              <input style={s.input} value={form.job_title} onChange={set('job_title')} placeholder="e.g. PLC Engineer" />
+              <label style={s.label}>Cost / Hour (₹)</label>
+              <input style={s.input} type="number" min="0" value={form.cost_per_hour} onChange={set('cost_per_hour')} placeholder="e.g. 650" />
               <label style={s.label}>Department</label>
               <input style={s.input} value={form.dept} onChange={set('dept')} placeholder="e.g. Field Service" />
+              <label style={s.label}>Team Lead</label>
+              <select style={s.select} value={form.reports_to} onChange={set('reports_to')}>
+                <option value="">None</option>
+                {data?.map((eng) => <option key={eng.id} value={eng.id}>{eng.name}</option>)}
+              </select>
               <div style={{ display:'flex', gap:10, marginTop:8 }}>
                 <button type="button" style={{ ...s.btn, background:colors.bgAlt, color:colors.text }} onClick={()=>setModal(false)}>Cancel</button>
                 <button type="submit" style={s.btn} disabled={create.isPending}>{create.isPending?'Creating…':'Create User'}</button>

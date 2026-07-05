@@ -100,7 +100,7 @@ export default function Reports() {
                       <td style={s.td}>{e.logs}</td>
                       <td style={s.td}>{Number(e.hours||0).toFixed(1)}</td>
                       <td style={s.td}>₹{Number(e.billing||0).toLocaleString('en-IN')}</td>
-                      <td style={s.td}>—</td>
+                      <td style={s.td}>₹{Number(e.cost||0).toLocaleString('en-IN')}</td>
                     </tr>
                   ))}
                 </tbody>

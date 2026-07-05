@@ -7,11 +7,11 @@ import { useAuth } from '../hooks/useAuth';
 import colors from '../theme';
 
 const STATUS_COLORS = {
-  Planned:colors.blueBg, 'In Progress':colors.greenBg, Completed:'#f0fdf4',
+  Planned:colors.blueBg, 'In Progress':colors.greenBg, Active:colors.greenBg, Completed:'#f0fdf4',
   'On Hold':colors.amberBg, Cancelled:colors.redBg,
 };
 const STATUS_TEXT = {
-  Planned:colors.blueDark, 'In Progress':colors.green, Completed:'#15803d',
+  Planned:colors.blueDark, 'In Progress':colors.green, Active:colors.green, Completed:'#15803d',
   'On Hold':'#ca8a04', Cancelled:colors.red,
 };
 
@@ -31,7 +31,7 @@ const s = {
   row:   { display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 },
 };
 
-const EMPTY = { name:'', customer_id:'', engineer_id:'', status:'Planned', category:'', product_type:'', value_inr:'', start_date:'', end_date:'' };
+const EMPTY = { name:'', customer_id:'', engineer_id:'', project_manager_id:'', status:'Planned', category:'', product_type:'', value_inr:'', quoted_hours:'', start_date:'', end_date:'' };
 
 export default function Projects() {
   const { user } = useAuth();
@@ -68,8 +68,9 @@ export default function Projects() {
               <span style={{ ...s.badge, background:STATUS_COLORS[p.status]||colors.bgAlt, color:STATUS_TEXT[p.status]||'#475569' }}>{p.status}</span>
               <div style={s.name}>{p.name}</div>
               <div style={s.meta}>🏭 {p.customer_name || 'No customer'}</div>
+              {p.project_manager_name && <div style={s.meta}>🧑‍💼 PM: {p.project_manager_name}</div>}
               <div style={s.meta}>👷 {p.engineer_name || 'Unassigned'}</div>
-              {p.value_inr && <div style={s.meta}>💰 ₹{Number(p.value_inr).toLocaleString('en-IN')}</div>}
+              {p.value_inr && <div style={s.meta}>💰 ₹{Number(p.value_inr).toLocaleString('en-IN')}{Number(p.quoted_hours) > 0 ? ` · ${Number(p.quoted_hours)} hrs quoted` : ''}</div>}
               {p.start_date && <div style={s.meta}>📅 {format(new Date(p.start_date),'dd MMM yyyy')}{p.end_date ? ` → ${format(new Date(p.end_date),'dd MMM yyyy')}` : ''}</div>}
               {canEdit && (
                 <button style={{ ...s.btn, background:colors.bgSlate, color:colors.text, marginTop:12, fontSize:12, padding:'6px 14px' }}
@@ -108,14 +109,27 @@ export default function Projects() {
               </div>
               <div style={s.row}>
                 <div>
-                  <label style={s.label}>Status</label>
-                  <select style={s.select} value={form.status} onChange={set('status')}>
-                    {['Planned','In Progress','Completed','On Hold','Cancelled'].map(v=><option key={v} value={v}>{v}</option>)}
+                  <label style={s.label}>Project Manager</label>
+                  <select style={s.select} value={form.project_manager_id || ''} onChange={set('project_manager_id')}>
+                    <option value="">Select…</option>
+                    {engineers?.filter(e=>['Director','Manager'].includes(e.role)).map(e=><option key={e.id} value={e.id}>{e.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={s.label}>Value (₹)</label>
+                  <label style={s.label}>Status</label>
+                  <select style={s.select} value={form.status} onChange={set('status')}>
+                    {['Planned','In Progress','Active','Completed','On Hold','Cancelled'].map(v=><option key={v} value={v}>{v}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={s.row}>
+                <div>
+                  <label style={s.label}>Quoted Value (₹)</label>
                   <input style={s.input} type="number" value={form.value_inr} onChange={set('value_inr')} placeholder="0" />
+                </div>
+                <div>
+                  <label style={s.label}>Quoted Hours</label>
+                  <input style={s.input} type="number" value={form.quoted_hours || ''} onChange={set('quoted_hours')} placeholder="0" />
                 </div>
               </div>
               <div style={s.row}>

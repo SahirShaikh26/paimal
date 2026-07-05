@@ -34,8 +34,10 @@ export default function Settings() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const isDirector = user?.role === 'Director';
-  const [newType, setNewType] = useState({ code: '', label: '', color: '#2563eb' });
+  const [newType, setNewType] = useState({ code: '', label: '', color: '#2563eb', category: '' });
   const [showForm, setShowForm] = useState(false);
+  const [newProduct, setNewProduct] = useState({ name: '', category: '' });
+  const [showProductForm, setShowProductForm] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['tenant-settings'],
@@ -43,7 +45,7 @@ export default function Settings() {
   });
 
   const update = useMutation({
-    mutationFn: (photo_capture_enabled) => api.put('/tenant/settings', { photo_capture_enabled }).then((r) => r.data),
+    mutationFn: (patch) => api.put('/tenant/settings', patch).then((r) => r.data),
     onSuccess: (d) => { qc.setQueryData(['tenant-settings'], d); toast.success('Settings updated'); },
     onError: (e) => toast.error(e.response?.data?.error || 'Could not update settings'),
   });
@@ -58,7 +60,7 @@ export default function Settings() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['activity-types'] });
       toast.success('Activity type added');
-      setNewType({ code: '', label: '', color: '#2563eb' });
+      setNewType({ code: '', label: '', color: '#2563eb', category: '' });
       setShowForm(false);
     },
     onError: (e) => toast.error(e.response?.data?.error || 'Could not add activity type'),
@@ -68,6 +70,28 @@ export default function Settings() {
     mutationFn: (id) => api.delete(`/activity-types/${id}`),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['activity-types'] }); toast.success('Removed'); },
     onError: (e) => toast.error(e.response?.data?.error || 'Could not remove activity type'),
+  });
+
+  const { data: products, isLoading: productsLoading } = useQuery({
+    queryKey: ['products'],
+    queryFn: () => api.get('/products').then((r) => r.data),
+  });
+
+  const createProduct = useMutation({
+    mutationFn: (d) => api.post('/products', d).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['products'] });
+      toast.success('Product added');
+      setNewProduct({ name: '', category: '' });
+      setShowProductForm(false);
+    },
+    onError: (e) => toast.error(e.response?.data?.error || 'Could not add product'),
+  });
+
+  const deleteProduct = useMutation({
+    mutationFn: (id) => api.delete(`/products/${id}`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['products'] }); toast.success('Removed'); },
+    onError: (e) => toast.error(e.response?.data?.error || 'Could not remove product'),
   });
 
   if (!isDirector) {
@@ -91,11 +115,58 @@ export default function Settings() {
             </div>
             <button
               style={s.toggle(data?.photo_capture_enabled)}
-              onClick={() => update.mutate(!data?.photo_capture_enabled)}
+              onClick={() => update.mutate({ photo_capture_enabled: !data?.photo_capture_enabled })}
               disabled={update.isPending}
               aria-label="Toggle photo capture"
             >
               <span style={s.knob(data?.photo_capture_enabled)} />
+            </button>
+          </div>
+
+          <div style={{ ...s.row, marginTop: 22, paddingTop: 22, borderTop: `1px solid ${colors.bgAlt}` }}>
+            <div>
+              <div style={s.label}>Customer Notifications</div>
+              <div style={s.desc}>
+                Automatically WhatsApp/SMS customers when a visit is scheduled, when the engineer is
+                on the way, and to send invoice payment links. Requires a messaging provider to be configured.
+              </div>
+            </div>
+            <button
+              style={s.toggle(data?.notifications_enabled)}
+              onClick={() => update.mutate({ notifications_enabled: !data?.notifications_enabled })}
+              disabled={update.isPending}
+              aria-label="Toggle customer notifications"
+            >
+              <span style={s.knob(data?.notifications_enabled)} />
+            </button>
+          </div>
+
+          <div style={{ ...s.row, marginTop: 22, paddingTop: 22, borderTop: `1px solid ${colors.bgAlt}` }}>
+            <div>
+              <div style={s.label}>Online Booking</div>
+              <div style={s.desc}>
+                Publish a public page where customers can request a service visit themselves.
+                Requests appear on your Schedule for approval.
+              </div>
+              {data?.online_booking_enabled && data?.slug && (
+                <div style={{ marginTop: 8, fontSize: 12.5 }}>
+                  <span style={{ color: colors.textMuted }}>Your booking link: </span>
+                  <button
+                    onClick={() => { navigator.clipboard?.writeText(`${window.location.origin}/book/${data.slug}`); toast.success('Link copied'); }}
+                    style={{ background: colors.blueBg, color: colors.blueDark, border: 'none', borderRadius: 5, padding: '3px 8px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+                  >
+                    /book/{data.slug} 📋
+                  </button>
+                </div>
+              )}
+            </div>
+            <button
+              style={s.toggle(data?.online_booking_enabled)}
+              onClick={() => update.mutate({ online_booking_enabled: !data?.online_booking_enabled })}
+              disabled={update.isPending}
+              aria-label="Toggle online booking"
+            >
+              <span style={s.knob(data?.online_booking_enabled)} />
             </button>
           </div>
         </div>
@@ -114,8 +185,8 @@ export default function Settings() {
               <div style={s.typeRow} key={t.id}>
                 <span style={{ ...s.swatch, background: t.color }} />
                 <span style={s.typeCode}>{t.code}</span>
-                <span style={s.typeLabel}>{t.label}</span>
-                <button style={s.delBtn} onClick={() => deleteType.mutate(t.id)}>Remove</button>
+                <span style={s.typeLabel}>{t.label}{t.category ? <span style={{ color: colors.textFaint, fontWeight: 400 }}> · {t.category}</span> : null}</span>
+                <button style={s.delBtn} onClick={() => { if (confirm(`Remove "${t.label}"? Existing logs that used this type are not affected.`)) deleteType.mutate(t.id); }}>Remove</button>
               </div>
             ))}
           </div>
@@ -142,6 +213,12 @@ export default function Settings() {
               required
             />
             <input
+              style={{ ...s.input, width: 130 }}
+              placeholder="Category (optional)"
+              value={newType.category}
+              onChange={(e) => setNewType((f) => ({ ...f, category: e.target.value }))}
+            />
+            <input
               type="color"
               style={{ width: 36, height: 34, padding: 2, border: `1px solid ${colors.borderInput}`, borderRadius: 6 }}
               value={newType.color}
@@ -156,6 +233,52 @@ export default function Settings() {
           </form>
         ) : (
           <button style={s.addBtn} onClick={() => setShowForm(true)}>+ Add Activity Type</button>
+        )}
+      </div>
+
+      <div style={s.card}>
+        <div style={s.label}>Products / Systems Catalogue</div>
+        <div style={s.desc}>
+          The equipment, systems, or products your team works on (e.g. "Mitsubishi iQ-R PLC").
+          These appear as suggestions when logging activity.
+        </div>
+
+        {productsLoading ? <p>Loading…</p> : (
+          <div style={{ marginTop: 14 }}>
+            {products?.map((p) => (
+              <div style={s.typeRow} key={p.id}>
+                <span style={s.typeLabel}>{p.name}{p.category ? <span style={{ color: colors.textFaint, fontWeight: 400 }}> · {p.category}</span> : null}</span>
+                <button style={s.delBtn} onClick={() => { if (confirm(`Remove "${p.name}"?`)) deleteProduct.mutate(p.id); }}>Remove</button>
+              </div>
+            ))}
+            {products?.length === 0 && <div style={{ ...s.desc, marginTop: 8 }}>No products yet.</div>}
+          </div>
+        )}
+
+        {showProductForm ? (
+          <form style={s.form} onSubmit={(e) => { e.preventDefault(); createProduct.mutate(newProduct); }}>
+            <input
+              style={{ ...s.input, flex: 1, minWidth: 180 }}
+              placeholder="Product / System name"
+              value={newProduct.name}
+              onChange={(e) => setNewProduct((f) => ({ ...f, name: e.target.value }))}
+              required
+            />
+            <input
+              style={{ ...s.input, width: 130 }}
+              placeholder="Category (optional)"
+              value={newProduct.category}
+              onChange={(e) => setNewProduct((f) => ({ ...f, category: e.target.value }))}
+            />
+            <button type="submit" style={s.addBtn} disabled={createProduct.isPending}>
+              {createProduct.isPending ? 'Adding…' : 'Add'}
+            </button>
+            <button type="button" style={{ ...s.addBtn, background: colors.bgAlt, color: colors.text }} onClick={() => setShowProductForm(false)}>
+              Cancel
+            </button>
+          </form>
+        ) : (
+          <button style={s.addBtn} onClick={() => setShowProductForm(true)}>+ Add Product</button>
         )}
       </div>
     </div>

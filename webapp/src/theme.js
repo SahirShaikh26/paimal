@@ -10,10 +10,20 @@ export const colors = {
   greenBg: '#dcfce7',
   amber: '#d97706',
   amberBg: '#fef9c3',
+  orange: '#f59e0b',
+  orangeLight: '#fbbf24',
   red: '#dc2626',
   redBg: '#fee2e2',
   cyan: '#0891b2',
   pink: '#be185d',
+
+  // Soft tile backgrounds — mirror the mobile Home action tiles
+  tileBlue: '#dbeafe',
+  tileAmber: '#fef3c7',
+  tileGreen: '#dcfce7',
+  tileIndigo: '#e0e7ff',
+  tileFuchsia: '#fae8ff',
+  tileRose: '#ffe4e6',
 
   bg: '#f0f4ff',
   bgAlt: '#f1f5f9',

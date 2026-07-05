@@ -11,10 +11,15 @@ const NAV = [
   { to: '/logs',      label: 'Activity Logs', icon: '📋' },
   { to: '/logs/new',  label: 'Log Activity', icon: '✏️' },
   { to: '/projects',  label: 'Projects',     icon: '🗂️' },
+  { to: '/assignments', label: 'Assignments', icon: '🧩', roles: ['Director', 'Manager'] },
   { to: '/schedule',  label: 'Schedule',     icon: '🗓️' },
+  { to: '/tickets',   label: 'Support Tickets', icon: '🎫' },
+  { to: '/quotes',    label: 'Quotes',       icon: '📝', roles: ['Director', 'Manager'] },
+  { to: '/invoices',  label: 'Invoices',     icon: '🧾', roles: ['Director', 'Manager'] },
   { to: '/customers', label: 'Customers',    icon: '🏭' },
   { to: '/engineers', label: 'Team',         icon: '👷' },
   { to: '/analytics', label: 'Analytics',   icon: '📈' },
+  { to: '/variance',  label: 'Planned vs Actual', icon: '🎯', roles: ['Director', 'Manager'] },
   { to: '/reports',   label: 'Reports',     icon: '📁' },
   { to: '/import',    label: 'Import Data', icon: '📥' },
   { to: '/digest',    label: 'Daily Digest', icon: '🧠', roles: ['Director', 'Manager'] },
@@ -34,6 +39,7 @@ export default function Layout() {
 
   const handleLogout = () => { logout(); navigate('/login'); };
   const closeSidebar = () => setSidebarOpen(false);
+  const initials = (user?.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
   return (
     <div style={{ display:'flex', minHeight:'100vh' }}>
@@ -98,7 +104,7 @@ export default function Layout() {
 
       {/* Main area */}
       <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', minWidth:0 }}>
-        <div style={{ background:colors.white, borderBottom:`1px solid ${colors.border}`, padding:'12px 16px', display:'flex', justifyContent:'space-between', alignItems:'center', flexShrink:0 }}>
+        <div style={{ background:colors.white, borderBottom:`1px solid ${colors.border}`, padding:'10px 16px', display:'flex', justifyContent:'space-between', alignItems:'center', flexShrink:0 }}>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             {isMobile && (
               <button
@@ -107,12 +113,26 @@ export default function Layout() {
                 style={{ background:'none', border:'none', cursor:'pointer', padding:'4px 6px', fontSize:22, color:colors.navy, lineHeight:1 }}
               >☰</button>
             )}
-            <span style={{ fontWeight:600, color:colors.navy, fontSize:15 }}>FieldPilot</span>
+            <span style={{ fontWeight:700, color:colors.navy, fontSize:16 }}>⚡ FieldPilot</span>
           </div>
-          <button
-            style={{ padding:'6px 14px', background:colors.red, color:colors.white, border:'none', borderRadius:6, cursor:'pointer', fontSize:13 }}
-            onClick={handleLogout}
-          >Logout</button>
+          <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+            <span style={{ fontSize:18, position:'relative' }} title="Notifications">🔔
+              <span style={{ position:'absolute', top:-1, right:-1, width:7, height:7, borderRadius:'50%', background:colors.red }} />
+            </span>
+            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+              <div style={{ width:34, height:34, borderRadius:'50%', background:colors.navy, color:colors.white, display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:800, flexShrink:0 }}>{initials}</div>
+              {!isMobile && (
+                <div style={{ lineHeight:1.2 }}>
+                  <div style={{ fontSize:13, fontWeight:700, color:colors.textDark }}>{user?.name}</div>
+                  <div style={{ fontSize:11, color:colors.textMuted }}>{user?.role}</div>
+                </div>
+              )}
+            </div>
+            <button
+              style={{ padding:'6px 14px', background:colors.red, color:colors.white, border:'none', borderRadius:8, cursor:'pointer', fontSize:13, fontWeight:600 }}
+              onClick={handleLogout}
+            >Logout</button>
+          </div>
         </div>
         <main style={{ flex:1, padding: isMobile ? '16px 12px' : 24, overflowY:'auto' }}>
           <Outlet />

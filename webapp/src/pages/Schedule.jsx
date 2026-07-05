@@ -62,6 +62,14 @@ export default function Schedule() {
     queryFn: () => api.get('/customers').then((r) => r.data),
     enabled: canCreate,
   });
+  // Machines belonging to the customer currently selected in the form, so a
+  // visit can be tied to a specific unit. GET /customers/:id returns them.
+  const { data: customerDetail } = useQuery({
+    queryKey: ['customer-machines', form.customer_id],
+    queryFn: () => api.get(`/customers/${form.customer_id}`).then((r) => r.data),
+    enabled: canCreate && !!form.customer_id,
+  });
+  const machines = customerDetail?.machines || [];
 
   const create = useMutation({
     mutationFn: (d) => api.post('/visits', d).then((r) => r.data),
@@ -96,6 +104,28 @@ export default function Schedule() {
     onError: (e) => toast.error(e.response?.data?.error || 'Could not update contract'),
   });
 
+  const { data: bookingRequests } = useQuery({
+    queryKey: ['booking-requests'],
+    queryFn: () => api.get('/booking-requests', { params: { status: 'Pending' } }).then((r) => r.data),
+    enabled: canCreate,
+  });
+
+  const onTheWay = useMutation({
+    mutationFn: (id) => api.post(`/visits/${id}/on-the-way`).then((r) => r.data),
+    onSuccess: () => toast.success('Customer notified'),
+    onError: (e) => toast.error(e.response?.data?.error || 'Could not notify'),
+  });
+  const approveRequest = useMutation({
+    mutationFn: (id) => api.post(`/booking-requests/${id}/approve`).then((r) => r.data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['booking-requests'] }); qc.invalidateQueries({ queryKey: ['customers'] }); toast.success('Approved — customer added'); },
+    onError: (e) => toast.error(e.response?.data?.error || 'Could not approve'),
+  });
+  const declineRequest = useMutation({
+    mutationFn: (id) => api.post(`/booking-requests/${id}/decline`).then((r) => r.data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['booking-requests'] }); toast.success('Declined'); },
+    onError: (e) => toast.error(e.response?.data?.error || 'Could not decline'),
+  });
+
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const engineerList = (engineers || []).filter((e) => e.role === 'Engineer');
 
@@ -118,6 +148,31 @@ export default function Schedule() {
         {canCreate && <button style={s.btn} onClick={() => { setForm(EMPTY); setMode('once'); setModal(true); }}>+ Schedule Visit</button>}
       </div>
 
+      {canCreate && bookingRequests && bookingRequests.length > 0 && (
+        <>
+          <div style={s.sectionTitle}>🔔 New Booking Requests ({bookingRequests.length})</div>
+          {bookingRequests.map((b) => (
+            <div style={{ ...s.card, borderLeft: `3px solid ${colors.amber}` }} key={b.id}>
+              <div style={s.row}>
+                <div>
+                  <div style={s.date}>{b.customer_name} · 📞 {b.customer_phone}</div>
+                  <div style={s.meta}>
+                    {b.service_type ? `${b.service_type}` : 'Service request'}
+                    {b.preferred_date ? ` · prefers ${format(new Date(b.preferred_date), 'MMM d, yyyy')}` : ''}
+                    {b.address ? ` · ${b.address}` : ''}
+                  </div>
+                  {b.notes && <div style={s.meta}>{b.notes}</div>}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <button style={{ ...s.btn, padding: '6px 12px', fontSize: 12 }} onClick={() => approveRequest.mutate(b.id)}>Approve</button>
+                  <button style={{ ...s.btn, background: colors.bgAlt, color: colors.text, padding: '6px 12px', fontSize: 12 }} onClick={() => declineRequest.mutate(b.id)}>Decline</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
       {isLoading ? <p>Loading…</p> : (!visits || visits.length === 0) ? (
         <p style={s.empty}>No visits scheduled yet.</p>
       ) : (
@@ -135,12 +190,21 @@ export default function Schedule() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ ...s.badge, background: STATUS_BG[v.status] || colors.bgAlt, color: STATUS_TEXT[v.status] || colors.text }}>{v.status}</span>
                 {canCreate && v.status === 'Scheduled' && (
-                  <button
-                    style={{ ...s.btn, background: colors.bgAlt, color: colors.text, padding: '5px 10px', fontSize: 12 }}
-                    onClick={() => cancelVisit.mutate(v.id)}
-                  >
-                    Cancel
-                  </button>
+                  <>
+                    <button
+                      style={{ ...s.btn, background: colors.blueBg, color: colors.blueDark, padding: '5px 10px', fontSize: 12 }}
+                      onClick={() => onTheWay.mutate(v.id)}
+                      title="WhatsApp/SMS the customer that the engineer is on the way"
+                    >
+                      On the way
+                    </button>
+                    <button
+                      style={{ ...s.btn, background: colors.bgAlt, color: colors.text, padding: '5px 10px', fontSize: 12 }}
+                      onClick={() => cancelVisit.mutate(v.id)}
+                    >
+                      Cancel
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -190,10 +254,20 @@ export default function Schedule() {
                 {engineerList.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
               </select>
               <label style={s.label}>Customer *</label>
-              <select style={s.select} value={form.customer_id} onChange={set('customer_id')} required>
+              <select style={s.select} value={form.customer_id} onChange={(e) => setForm((f) => ({ ...f, customer_id: e.target.value, machine_id: '' }))} required>
                 <option value="">Select customer</option>
                 {(customers || []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
+
+              {machines.length > 0 && (
+                <>
+                  <label style={s.label}>Machine (optional)</label>
+                  <select style={s.select} value={form.machine_id} onChange={set('machine_id')}>
+                    <option value="">No specific machine</option>
+                    {machines.map((m) => <option key={m.id} value={m.id}>{m.name}{m.model ? ` (${m.model})` : ''}</option>)}
+                  </select>
+                </>
+              )}
 
               {mode === 'once' ? (
                 <>
