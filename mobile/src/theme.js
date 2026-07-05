@@ -2,9 +2,14 @@
 // the webapp's src/theme.js so web and mobile share one brand definition.
 export const COLORS = {
   navy: '#1e3a5f',
+  navyDeep: '#16305a',
+  navyCard: '#1d3a63',
   blue: '#2563eb',
   blueLight: '#60a5fa',
   blueDark: '#1d4ed8',
+  // Warm accent used for greetings / highlights (matches the app design language).
+  orange: '#f59e0b',
+  orangeLight: '#fbbf24',
   purple: '#7c3aed',
   green: '#16a34a',
   greenBg: '#dcfce7',

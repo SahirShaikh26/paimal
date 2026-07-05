@@ -112,7 +112,7 @@ export default function LogActivityScreen({ navigation, route }) {
       Alert.alert(
         queued ? 'Saved offline' : 'Saved!',
         queued ? 'No connection — this log will sync automatically once you\'re back online.' : 'Activity logged successfully',
-        [{ text:'OK', onPress:()=>navigation.navigate('Logs') }]
+        [{ text:'OK', onPress:()=>navigation.navigate('Tabs', { screen: 'Logs' }) }]
       );
     } catch (err) {
       Alert.alert('Error', err.response?.data?.error || 'Could not save');

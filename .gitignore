@@ -14,6 +14,9 @@ build/
 .expo/
 mobile/.expo/
 mobile/node_modules/
+# Generated native projects (recreate with `expo prebuild`)
+mobile/android/
+mobile/ios/
 
 # Logs
 *.log
