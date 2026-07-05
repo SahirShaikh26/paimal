@@ -61,6 +61,7 @@ router.post('/', async (req, res) => {
     customer_id, machine_id, project_id, date, activity_code,
     query_type, product_type, hours, billing_inr, cost_inr,
     status, location, notes, visit_id, photo_urls,
+    work_mode, travel_hours, billable, ticket_no,
   } = req.body;
 
   if (!activity_code || !date) {
@@ -68,18 +69,29 @@ router.post('/', async (req, res) => {
   }
 
   try {
+    // Auto-cost: if no explicit cost given, derive it from the engineer's rate
+    // (cost = worked hours × cost/hour), matching the spreadsheet behaviour.
+    let resolvedCost = cost_inr;
+    if (resolvedCost == null || resolvedCost === '') {
+      const { rows: u } = await db.query(`SELECT cost_per_hour FROM users WHERE id=$1`, [req.user.id]);
+      const rate = Number(u[0]?.cost_per_hour) || 0;
+      resolvedCost = rate * (Number(hours) || 0);
+    }
+
     const { rows } = await db.query(
       `INSERT INTO activity_logs
          (tenant_id, engineer_id, customer_id, machine_id, project_id,
           date, activity_code, query_type, product_type, hours,
-          billing_inr, cost_inr, status, location, notes, visit_id, photo_urls)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+          billing_inr, cost_inr, status, location, notes, visit_id, photo_urls,
+          work_mode, travel_hours, billable, ticket_no)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
        RETURNING *`,
       [
         req.tenantId, req.user.id, customer_id || null, machine_id || null, project_id || null,
         date, activity_code, query_type || null, product_type || null, hours || null,
-        billing_inr || 0, cost_inr || 0, status || null, location || null, notes || null,
+        billing_inr || 0, resolvedCost || 0, status || null, location || null, notes || null,
         visit_id || null, JSON.stringify(photo_urls || []),
+        work_mode || null, travel_hours || 0, billable !== false, ticket_no || null,
       ]
     );
 
@@ -118,6 +130,7 @@ router.put('/:id', async (req, res) => {
     customer_id, machine_id, project_id, date, activity_code,
     query_type, product_type, hours, billing_inr, cost_inr,
     status, location, notes, photo_urls,
+    work_mode, travel_hours, billable, ticket_no,
   } = req.body;
 
   try {
@@ -126,7 +139,11 @@ router.put('/:id', async (req, res) => {
          customer_id=$1, machine_id=$2, project_id=$3, date=$4,
          activity_code=$5, query_type=$6, product_type=$7, hours=$8,
          billing_inr=$9, cost_inr=$10, status=$11, location=$12, notes=$13,
-         photo_urls=COALESCE($14, photo_urls)
+         photo_urls=COALESCE($14, photo_urls),
+         work_mode=COALESCE($17, work_mode),
+         travel_hours=COALESCE($18, travel_hours),
+         billable=COALESCE($19, billable),
+         ticket_no=COALESCE($20, ticket_no)
        WHERE id=$15 AND tenant_id=$16
        RETURNING *`,
       [
@@ -134,6 +151,8 @@ router.put('/:id', async (req, res) => {
         query_type, product_type, hours, billing_inr, cost_inr,
         status, location, notes, photo_urls ? JSON.stringify(photo_urls) : null,
         req.params.id, req.tenantId,
+        work_mode ?? null, travel_hours ?? null,
+        typeof billable === 'boolean' ? billable : null, ticket_no ?? null,
       ]
     );
     if (!rows.length) return res.status(404).json({ error: 'Log not found' });

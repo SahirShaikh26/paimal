@@ -11,7 +11,7 @@ router.use(auth, tenant);
 router.get('/', async (req, res) => {
   try {
     const { rows } = await db.query(
-      `SELECT id, name, email, role, dept, reports_to, active, created_at
+      `SELECT id, name, email, role, dept, job_title, cost_per_hour, reports_to, active, created_at
        FROM users WHERE tenant_id=$1 ORDER BY name`,
       [req.tenantId]
     );
@@ -46,7 +46,7 @@ router.post('/', async (req, res) => {
   if (req.user.role !== 'Director') {
     return res.status(403).json({ error: 'Only Directors can create users' });
   }
-  const { name, email, password, role, dept, reports_to } = req.body;
+  const { name, email, password, role, dept, reports_to, job_title, cost_per_hour } = req.body;
   if (!name || !email || !password || !role) {
     return res.status(400).json({ error: 'name, email, password, role required' });
   }
@@ -68,10 +68,10 @@ router.post('/', async (req, res) => {
 
     const hash = await bcrypt.hash(password, 12);
     const { rows } = await db.query(
-      `INSERT INTO users (tenant_id, name, email, password_hash, role, dept, reports_to)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)
-       RETURNING id, name, email, role, dept, reports_to, created_at`,
-      [req.tenantId, name, email, hash, role, dept, reports_to || null]
+      `INSERT INTO users (tenant_id, name, email, password_hash, role, dept, reports_to, job_title, cost_per_hour)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       RETURNING id, name, email, role, dept, job_title, cost_per_hour, reports_to, created_at`,
+      [req.tenantId, name, email, hash, role, dept, reports_to || null, job_title || null, cost_per_hour || 0]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -86,14 +86,16 @@ router.put('/:id', async (req, res) => {
   if (!['Director', 'Manager'].includes(req.user.role) && req.user.id !== req.params.id) {
     return res.status(403).json({ error: 'Insufficient permissions' });
   }
-  const { name, role, dept, reports_to, active } = req.body;
+  const { name, role, dept, reports_to, active, job_title, cost_per_hour } = req.body;
 
   try {
     const { rows } = await db.query(
-      `UPDATE users SET name=$1, role=$2, dept=$3, reports_to=$4, active=$5
+      `UPDATE users SET name=$1, role=$2, dept=$3, reports_to=$4, active=$5,
+         job_title=COALESCE($8, job_title), cost_per_hour=COALESCE($9, cost_per_hour)
        WHERE id=$6 AND tenant_id=$7
-       RETURNING id, name, email, role, dept, reports_to, active`,
-      [name, role, dept, reports_to, active, req.params.id, req.tenantId]
+       RETURNING id, name, email, role, dept, job_title, cost_per_hour, reports_to, active`,
+      [name, role, dept, reports_to, active, req.params.id, req.tenantId,
+       job_title ?? null, cost_per_hour ?? null]
     );
     if (!rows.length) return res.status(404).json({ error: 'User not found' });
     res.json(rows[0]);

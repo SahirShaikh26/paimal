@@ -2,8 +2,30 @@ const router = require('express').Router();
 const db = require('../db');
 const auth = require('../middleware/auth');
 const tenant = require('../middleware/tenant');
+const { sendMessage } = require('../notify');
 
 router.use(auth, tenant);
+
+// Best-effort customer notification for a visit — looks up the customer's phone
+// and the tenant's notification setting, then sends. Never throws.
+async function notifyCustomerForVisit(tenantId, visitId, makeBody) {
+  try {
+    const { rows } = await db.query(
+      `SELECT v.scheduled_date, c.contact_phone, c.contact_name, u.name AS engineer_name, t.notifications_enabled
+       FROM visits v
+       LEFT JOIN customers c ON c.id = v.customer_id
+       LEFT JOIN users u ON u.id = v.engineer_id
+       JOIN tenants t ON t.id = v.tenant_id
+       WHERE v.id=$1 AND v.tenant_id=$2`,
+      [visitId, tenantId]
+    );
+    const r = rows[0];
+    if (!r || !r.notifications_enabled || !r.contact_phone) return;
+    await sendMessage({ to: r.contact_phone, channel: 'whatsapp', body: makeBody(r) });
+  } catch (err) {
+    console.error('Visit notification error:', err.message);
+  }
+}
 
 const TARGET_FUTURE_OCCURRENCES = 3;
 
@@ -209,7 +231,27 @@ router.post('/', async (req, res) => {
        RETURNING *`,
       [req.tenantId, engineer_id, customer_id, machine_id || null, project_id || null, scheduled_date, notes || null, req.user.id]
     );
+    notifyCustomerForVisit(req.tenantId, rows[0].id, (r) =>
+      `Hi ${r.contact_name || ''}, your service visit is scheduled for ${r.scheduled_date.toISOString().split('T')[0]}. We'll see you then!`
+    );
     res.status(201).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /api/visits/:id/on-the-way  — notify the customer the engineer is en route
+router.post('/:id/on-the-way', async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT id FROM visits WHERE id=$1 AND tenant_id=$2`, [req.params.id, req.tenantId]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Visit not found' });
+    await notifyCustomerForVisit(req.tenantId, req.params.id, (r) =>
+      `Hi ${r.contact_name || ''}, your engineer ${r.engineer_name || ''} is on the way for today's service visit.`
+    );
+    res.json({ message: 'Customer notified' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
@@ -224,13 +266,18 @@ router.put('/:id', async (req, res) => {
   const { engineer_id, customer_id, machine_id, project_id, scheduled_date, notes, status } = req.body;
 
   try {
+    // COALESCE so partial updates (e.g. the Cancel button sending only {status})
+    // don't wipe other columns — scheduled_date is NOT NULL and would error.
     const { rows } = await db.query(
       `UPDATE visits SET
-         engineer_id=$1, customer_id=$2, machine_id=$3, project_id=$4,
-         scheduled_date=$5, notes=$6, status=$7
+         engineer_id=COALESCE($1,engineer_id), customer_id=COALESCE($2,customer_id),
+         machine_id=COALESCE($3,machine_id), project_id=COALESCE($4,project_id),
+         scheduled_date=COALESCE($5,scheduled_date), notes=COALESCE($6,notes),
+         status=COALESCE($7,status)
        WHERE id=$8 AND tenant_id=$9
        RETURNING *`,
-      [engineer_id, customer_id, machine_id, project_id, scheduled_date, notes, status, req.params.id, req.tenantId]
+      [engineer_id ?? null, customer_id ?? null, machine_id ?? null, project_id ?? null,
+       scheduled_date ?? null, notes ?? null, status ?? null, req.params.id, req.tenantId]
     );
     if (!rows.length) return res.status(404).json({ error: 'Visit not found' });
     res.json(rows[0]);

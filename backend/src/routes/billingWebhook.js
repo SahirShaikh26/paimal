@@ -26,6 +26,19 @@ router.post('/', async (req, res) => {
   try {
     const entity = event.payload?.subscription?.entity;
 
+    // Invoice payment links resolve here when the customer pays.
+    if (event.event === 'payment_link.paid') {
+      const pl = event.payload?.payment_link?.entity;
+      if (pl?.id) {
+        await db.query(
+          `UPDATE invoices SET status='Paid', amount_paid=total, paid_at=NOW()
+           WHERE razorpay_payment_link_id=$1`,
+          [pl.id]
+        );
+      }
+      return res.json({ status: 'ok' });
+    }
+
     switch (event.event) {
       case 'subscription.authenticated':
       case 'subscription.activated': {

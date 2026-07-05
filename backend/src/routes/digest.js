@@ -45,6 +45,11 @@ router.post('/generate', async (req, res) => {
   if (!['Director', 'Manager'].includes(req.user.role)) {
     return res.status(403).json({ error: 'Insufficient permissions' });
   }
+  // Degrade gracefully (like billing/payments) when the AI key isn't configured,
+  // rather than doing all the work and failing with a 500.
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(503).json({ error: 'AI digest is not configured' });
+  }
 
   const period = req.body.period === 'week' ? 'week' : 'day';
   const { start, end } = periodRange(period);

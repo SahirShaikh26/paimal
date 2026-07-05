@@ -26,7 +26,10 @@ router.get('/summary', async (req, res) => {
          SUM(l.billing_inr)                AS total_billing,
          SUM(l.cost_inr)                   AS total_cost,
          COUNT(DISTINCT l.engineer_id)     AS active_engineers,
-         COUNT(DISTINCT l.customer_id)     AS customers_served
+         COUNT(DISTINCT l.customer_id)     AS customers_served,
+         COALESCE(SUM(l.travel_hours),0)   AS travel_hours,
+         COALESCE(SUM(l.hours) FILTER (WHERE l.billable),0)     AS billable_hours,
+         COALESCE(SUM(l.hours) FILTER (WHERE NOT l.billable),0) AS non_billable_hours
        FROM activity_logs l WHERE ${where}`,
       params
     );
@@ -42,7 +45,8 @@ router.get('/summary', async (req, res) => {
       `SELECT u.name, l.engineer_id,
               COUNT(*)::int AS logs,
               SUM(l.hours) AS hours,
-              SUM(l.billing_inr) AS billing
+              SUM(l.billing_inr) AS billing,
+              SUM(l.cost_inr) AS cost
        FROM activity_logs l
        JOIN users u ON u.id = l.engineer_id
        WHERE ${where}
@@ -117,6 +121,51 @@ router.get('/export/csv', async (req, res) => {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename="fieldpilot-logs-${Date.now()}.csv"`);
     res.send(csv);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/reports/variance  — Planned Days (assignments) vs Actual Days (logs),
+// grouped by Project × Engineer × Activity. Actual days = logged hours / 8.
+// Planned and actual are aggregated separately to avoid double-counting when a
+// (project, engineer, activity) combination has more than one assignment row.
+router.get('/variance', async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `WITH planned AS (
+         SELECT a.project_id, a.engineer_id, at.code AS activity_code,
+                MAX(at.label) AS activity_label, SUM(a.planned_days) AS planned_days
+         FROM assignments a
+         LEFT JOIN activity_types at ON at.id = a.activity_type_id
+         WHERE a.tenant_id=$1
+         GROUP BY a.project_id, a.engineer_id, at.code
+       ),
+       actual AS (
+         SELECT l.project_id, l.engineer_id, l.activity_code,
+                COALESCE(SUM(l.hours),0)/8.0 AS actual_days
+         FROM activity_logs l
+         WHERE l.tenant_id=$1
+         GROUP BY l.project_id, l.engineer_id, l.activity_code
+       )
+       SELECT p.name AS project_name, pl.project_id,
+              u.name AS engineer_name, pl.engineer_id,
+              pl.activity_label, pl.activity_code,
+              pl.planned_days::float AS planned_days,
+              COALESCE(ac.actual_days,0)::float AS actual_days,
+              (pl.planned_days - COALESCE(ac.actual_days,0))::float AS variance_days
+       FROM planned pl
+       LEFT JOIN actual ac
+         ON ac.project_id = pl.project_id
+        AND ac.engineer_id = pl.engineer_id
+        AND ac.activity_code = pl.activity_code
+       LEFT JOIN projects p ON p.id = pl.project_id
+       LEFT JOIN users u ON u.id = pl.engineer_id
+       ORDER BY p.name, u.name, pl.activity_label`,
+      [req.tenantId]
+    );
+    res.json(rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });

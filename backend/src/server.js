@@ -21,6 +21,13 @@ const digestRoutes = require('./routes/digest');
 const visitsRoutes = require('./routes/visits');
 const tenantRoutes = require('./routes/tenant');
 const activityTypesRoutes = require('./routes/activityTypes');
+const quotesRoutes = require('./routes/quotes');
+const invoicesRoutes = require('./routes/invoices');
+const publicRoutes = require('./routes/public');
+const bookingRequestsRoutes = require('./routes/bookingRequests');
+const productsRoutes = require('./routes/products');
+const assignmentsRoutes = require('./routes/assignments');
+const supportTicketsRoutes = require('./routes/supportTickets');
 
 async function migrate() {
   const stmts = [
@@ -46,6 +53,40 @@ async function migrate() {
     `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS plan_status VARCHAR(20) DEFAULT 'trialing'`,
     `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMP`,
     `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS photo_capture_enabled BOOLEAN DEFAULT false`,
+    // --- Revenue-cycle: quotes, invoices, online booking, notifications ---
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS notifications_enabled BOOLEAN DEFAULT false`,
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS online_booking_enabled BOOLEAN DEFAULT false`,
+    // Atomic per-tenant counters for human-friendly quote/invoice numbers.
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS next_quote_seq INTEGER DEFAULT 1`,
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS next_invoice_seq INTEGER DEFAULT 1`,
+    `CREATE TABLE IF NOT EXISTS quotes (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, customer_id UUID REFERENCES customers(id), quote_number VARCHAR(30), status VARCHAR(20) DEFAULT 'Draft' CHECK (status IN ('Draft','Sent','Accepted','Declined','Converted')), line_items JSONB DEFAULT '[]', subtotal DECIMAL(14,2) DEFAULT 0, tax_pct DECIMAL(5,2) DEFAULT 0, tax_amount DECIMAL(14,2) DEFAULT 0, total DECIMAL(14,2) DEFAULT 0, notes TEXT, valid_until DATE, created_by UUID REFERENCES users(id), created_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE TABLE IF NOT EXISTS invoices (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, customer_id UUID REFERENCES customers(id), quote_id UUID REFERENCES quotes(id), invoice_number VARCHAR(30), status VARCHAR(20) DEFAULT 'Draft' CHECK (status IN ('Draft','Sent','Paid','Overdue','Cancelled')), line_items JSONB DEFAULT '[]', subtotal DECIMAL(14,2) DEFAULT 0, tax_pct DECIMAL(5,2) DEFAULT 0, tax_amount DECIMAL(14,2) DEFAULT 0, total DECIMAL(14,2) DEFAULT 0, amount_paid DECIMAL(14,2) DEFAULT 0, razorpay_payment_link_id VARCHAR(100), razorpay_payment_link_url TEXT, due_date DATE, notes TEXT, created_by UUID REFERENCES users(id), created_at TIMESTAMP DEFAULT NOW(), paid_at TIMESTAMP)`,
+    `CREATE TABLE IF NOT EXISTS booking_requests (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, customer_name VARCHAR(200) NOT NULL, customer_phone VARCHAR(20) NOT NULL, customer_email VARCHAR(150), address TEXT, service_type VARCHAR(100), preferred_date DATE, notes TEXT, status VARCHAR(20) DEFAULT 'Pending' CHECK (status IN ('Pending','Approved','Declined')), created_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE INDEX IF NOT EXISTS idx_quotes_tenant ON quotes(tenant_id, created_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_invoices_tenant ON invoices(tenant_id, created_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_invoices_paylink ON invoices(razorpay_payment_link_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_booking_requests_tenant ON booking_requests(tenant_id, created_at DESC)`,
+    // --- System-integrator / project-execution model (matches client spreadsheets) ---
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS job_title VARCHAR(80)`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS cost_per_hour DECIMAL(10,2) DEFAULT 0`,
+    `ALTER TABLE projects ADD COLUMN IF NOT EXISTS project_manager_id UUID REFERENCES users(id)`,
+    `ALTER TABLE projects ADD COLUMN IF NOT EXISTS quoted_hours DECIMAL(10,1)`,
+    `ALTER TABLE activity_types ADD COLUMN IF NOT EXISTS category VARCHAR(40)`,
+    `ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS work_mode VARCHAR(20)`,
+    `ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS travel_hours DECIMAL(5,1) DEFAULT 0`,
+    `ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS billable BOOLEAN DEFAULT true`,
+    `ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS ticket_no VARCHAR(40)`,
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS next_ticket_seq INTEGER DEFAULT 1`,
+    // Products / systems catalogue (per-tenant, configurable like activity_types).
+    `CREATE TABLE IF NOT EXISTS products (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, name VARCHAR(120) NOT NULL, category VARCHAR(40), sort_order INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT NOW())`,
+    // Assignments: the PM planning layer — Project × Activity × Engineer × Planned Days.
+    `CREATE TABLE IF NOT EXISTS assignments (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, project_id UUID REFERENCES projects(id) ON DELETE CASCADE, activity_type_id UUID REFERENCES activity_types(id), engineer_id UUID REFERENCES users(id), product VARCHAR(120), planned_days DECIMAL(6,1) DEFAULT 0, start_date DATE, end_date DATE, status VARCHAR(30) DEFAULT 'Not Started', notes TEXT, created_by UUID REFERENCES users(id), created_at TIMESTAMP DEFAULT NOW())`,
+    // Support tickets (Type / Priority / Open→Closed lifecycle).
+    `CREATE TABLE IF NOT EXISTS support_tickets (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, ticket_no VARCHAR(40), project_id UUID REFERENCES projects(id), customer_id UUID REFERENCES customers(id), activity_type_id UUID REFERENCES activity_types(id), product VARCHAR(120), type VARCHAR(40), priority VARCHAR(20) DEFAULT 'Medium', issue TEXT, assigned_engineer_id UUID REFERENCES users(id), hours DECIMAL(6,1) DEFAULT 0, billable BOOLEAN DEFAULT true, status VARCHAR(20) DEFAULT 'Open', date_raised DATE DEFAULT CURRENT_DATE, closed_date DATE, created_by UUID REFERENCES users(id), created_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE INDEX IF NOT EXISTS idx_products_tenant ON products(tenant_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_assignments_tenant ON assignments(tenant_id, project_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_assignments_engineer ON assignments(engineer_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_tickets_tenant ON support_tickets(tenant_id, created_at DESC)`,
     // Seed default activity types for any tenant that doesn't have any yet —
     // covers existing tenants on first migrate() after this column was added,
     // and is a no-op for tenants that already have a customized list.
@@ -105,6 +146,13 @@ app.use('/api/digest', digestRoutes);
 app.use('/api/visits', visitsRoutes);
 app.use('/api/tenant', tenantRoutes);
 app.use('/api/activity-types', activityTypesRoutes);
+app.use('/api/quotes', quotesRoutes);
+app.use('/api/invoices', invoicesRoutes);
+app.use('/api/booking-requests', bookingRequestsRoutes);
+app.use('/api/public', publicRoutes);
+app.use('/api/products', productsRoutes);
+app.use('/api/assignments', assignmentsRoutes);
+app.use('/api/support-tickets', supportTicketsRoutes);
 
 app.get('/api/health', async (req, res) => {
   const start = Date.now();
