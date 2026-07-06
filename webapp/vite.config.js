@@ -24,18 +24,10 @@ export default defineConfig({
   ],
   server: { proxy: { '/api': 'http://localhost:4000' } },
   build: {
-    modulePreload: {
-      // Vite conservatively modulepreloads every chunk reachable from the
-      // import graph, including recharts — even on the login page, before
-      // auth. That defeats the point of lazy-loading it; only let it
-      // preload truly-critical chunks.
-      resolveDependencies: (_filename, deps) => deps.filter((dep) => !dep.includes('recharts')),
-    },
     rollupOptions: {
       output: {
         manualChunks: {
           'react-query': ['@tanstack/react-query'],
-          recharts: ['recharts'],
         },
       },
     },

@@ -4,33 +4,34 @@ import { useAuth } from '../hooks/useAuth';
 import { useIsMobile } from '../hooks/useIsMobile';
 import colors from '../theme';
 import { PaimalMark } from './PaimalMark';
+import Icon from './Icon';
 
 const OWNER_EMAILS = (import.meta.env.VITE_OWNER_EMAILS || '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
 
 const NAV = [
-  { to: '/',          label: 'Dashboard',    icon: '📊' },
-  { to: '/logs',      label: 'Activity Logs', icon: '📋' },
-  { to: '/logs/new',  label: 'Log Activity', icon: '✏️' },
-  { to: '/projects',  label: 'Projects',     icon: '🗂️' },
-  { to: '/assignments', label: 'Assignments', icon: '🧩', roles: ['Director', 'Manager'] },
-  { to: '/schedule',  label: 'Schedule',     icon: '🗓️' },
-  { to: '/tickets',   label: 'Support Tickets', icon: '🎫' },
-  { to: '/quotes',    label: 'Quotes',       icon: '📝', roles: ['Director', 'Manager'] },
-  { to: '/invoices',  label: 'Invoices',     icon: '🧾', roles: ['Director', 'Manager'] },
-  { to: '/customers', label: 'Customers',    icon: '🏭' },
-  { to: '/engineers', label: 'Team',         icon: '👷' },
-  { to: '/analytics', label: 'Analytics',   icon: '📈' },
-  { to: '/variance',  label: 'Planned vs Actual', icon: '🎯', roles: ['Director', 'Manager'] },
-  { to: '/reports',   label: 'Reports',     icon: '📁' },
-  { to: '/import',    label: 'Import Data', icon: '📥' },
-  { to: '/digest',    label: 'Daily Digest', icon: '🧠', roles: ['Director', 'Manager'] },
-  { to: '/billing',   label: 'Billing',     icon: '💳', roles: ['Director'] },
-  { to: '/settings',  label: 'Settings',    icon: '⚙️', roles: ['Director'] },
-  { to: '/status',    label: 'Status',      icon: '🩺', ownerOnly: true },
+  { to: '/',          label: 'Dashboard',    icon: 'grid' },
+  { to: '/logs',      label: 'Activity Logs', icon: 'list' },
+  { to: '/logs/new',  label: 'Log Activity', icon: 'edit' },
+  { to: '/projects',  label: 'Projects',     icon: 'folder' },
+  { to: '/assignments', label: 'Assignments', icon: 'layers', roles: ['Director', 'Manager'] },
+  { to: '/schedule',  label: 'Schedule',     icon: 'calendar' },
+  { to: '/tickets',   label: 'Support Tickets', icon: 'ticket' },
+  { to: '/quotes',    label: 'Quotes',       icon: 'file', roles: ['Director', 'Manager'] },
+  { to: '/invoices',  label: 'Invoices',     icon: 'receipt', roles: ['Director', 'Manager'] },
+  { to: '/customers', label: 'Customers',    icon: 'building' },
+  { to: '/engineers', label: 'Team',         icon: 'users' },
+  { to: '/analytics', label: 'Analytics',   icon: 'chart' },
+  { to: '/variance',  label: 'Planned vs Actual', icon: 'target', roles: ['Director', 'Manager'] },
+  { to: '/reports',   label: 'Reports',     icon: 'clipboard' },
+  { to: '/import',    label: 'Import Data', icon: 'download' },
+  { to: '/digest',    label: 'Daily Digest', icon: 'sparkle', roles: ['Director', 'Manager'] },
+  { to: '/billing',   label: 'Billing',     icon: 'card', roles: ['Director'] },
+  { to: '/settings',  label: 'Settings',    icon: 'gear', roles: ['Director'] },
+  { to: '/status',    label: 'Status',      icon: 'pulse', ownerOnly: true },
 ];
 
-const navLink   = { display:'flex', alignItems:'center', gap:10, padding:'10px 20px', color:'rgba(255,255,255,.75)', textDecoration:'none', fontSize:14 };
-const navActive = { background:'rgba(255,255,255,.15)', color:colors.white, borderRight:`3px solid ${colors.blueLight}` };
+const navLink   = { display:'flex', alignItems:'center', gap:11, padding:'10px 20px', color:'rgba(255,255,255,.72)', textDecoration:'none', fontSize:14 };
+const navActive = { background:'rgba(246,166,42,.14)', color:colors.white, borderRight:`3px solid ${colors.blueLight}` };
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -96,7 +97,7 @@ export default function Layout() {
               onClick={isMobile ? closeSidebar : undefined}
               style={({ isActive }) => ({ ...navLink, ...(isActive ? navActive : {}) })}
             >
-              <span>{icon}</span>{label}
+              <Icon name={icon} size={18} />{label}
             </NavLink>
           ))}
         </nav>
@@ -123,8 +124,9 @@ export default function Layout() {
             </span>
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-            <span style={{ fontSize:18, position:'relative' }} title="Notifications">🔔
-              <span style={{ position:'absolute', top:-1, right:-1, width:7, height:7, borderRadius:'50%', background:colors.red }} />
+            <span style={{ position:'relative', display:'flex', color:colors.textMuted }} title="Notifications">
+              <Icon name="bell" size={20} />
+              <span style={{ position:'absolute', top:-2, right:-2, width:7, height:7, borderRadius:'50%', background:colors.accent, border:`1.5px solid ${colors.white}` }} />
             </span>
             <div style={{ display:'flex', alignItems:'center', gap:8 }}>
               <div style={{ width:34, height:34, borderRadius:'50%', background:colors.navy, color:colors.white, display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:800, flexShrink:0 }}>{initials}</div>

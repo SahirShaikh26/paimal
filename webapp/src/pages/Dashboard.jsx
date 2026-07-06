@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import colors from '../theme';
+import Icon from '../components/Icon';
 
 const card = { background:colors.white, borderRadius:14, padding:20, boxShadow:'0 1px 4px rgba(0,0,0,.08)' };
 
@@ -27,8 +28,8 @@ function QrGlyph() {
   );
 }
 
-// Pure-CSS bar chart — avoids pulling the 150 kB-gzip recharts bundle onto the
-// Dashboard (recharts stays lazy-loaded on Analytics for the richer charts).
+// Pure-CSS bar chart — the whole app now uses hand-rolled SVG/CSS charts, so
+// there's no chart library in the bundle at all.
 function BillingBars({ data }) {
   const max = Math.max(...data.map((d) => Number(d.billing) || 0), 1);
   return (
@@ -90,14 +91,14 @@ export default function Dashboard() {
   const visitCount = (visits || []).length;
 
   const TILES = [
-    { label:'Log Activity',  icon:'✏️', bg:colors.tileBlue,    to:'/logs/new' },
-    { label:'Activity Logs', icon:'📋', bg:colors.tileAmber,   to:'/logs' },
-    { label:'Schedule',      icon:'🗓️', bg:colors.tileGreen,   to:'/schedule' },
-    { label:'Projects',      icon:'🗂️', bg:colors.tileIndigo,  to:'/projects' },
-    { label:'Analytics',     icon:'📊', bg:colors.tileFuchsia, to:'/analytics' },
-    { label:'Customers',     icon:'🏭', bg:colors.tileRose,    to:'/customers' },
-    { label:'Reports',       icon:'📁', bg:colors.tileBlue,    to:'/reports' },
-    { label:'Import Data',   icon:'📥', bg:colors.tileAmber,   to:'/import', roles:['Director','Manager'] },
+    { label:'Log Activity',  icon:'edit',     bg:colors.tileBlue,    to:'/logs/new' },
+    { label:'Activity Logs', icon:'list',     bg:colors.tileAmber,   to:'/logs' },
+    { label:'Schedule',      icon:'calendar', bg:colors.tileGreen,   to:'/schedule' },
+    { label:'Projects',      icon:'folder',   bg:colors.tileIndigo,  to:'/projects' },
+    { label:'Analytics',     icon:'chart',    bg:colors.tileFuchsia, to:'/analytics' },
+    { label:'Customers',     icon:'building', bg:colors.tileRose,    to:'/customers' },
+    { label:'Reports',       icon:'clipboard',bg:colors.tileBlue,    to:'/reports' },
+    { label:'Import Data',   icon:'download',  bg:colors.tileAmber,   to:'/import', roles:['Director','Manager'] },
   ];
   const tiles = TILES.filter((x) => !x.roles || x.roles.includes(user?.role));
 
@@ -156,7 +157,7 @@ export default function Dashboard() {
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,.12)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,.08)'; }}
               >
-                <div style={{ width:56, height:56, borderRadius:16, background:tile.bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:26 }}>{tile.icon}</div>
+                <div style={{ width:56, height:56, borderRadius:16, background:tile.bg, display:'flex', alignItems:'center', justifyContent:'center', color:colors.navy }}><Icon name={tile.icon} size={24} strokeWidth={1.8} /></div>
                 <span style={{ fontSize:13, color:colors.textDark, fontWeight:600, textAlign:'center' }}>{tile.label}</span>
               </button>
             ))}
