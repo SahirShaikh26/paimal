@@ -8,11 +8,11 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'FieldPilot',
-        short_name: 'FieldPilot',
-        description: 'Field Service Management',
-        theme_color: '#2563eb',
-        background_color: '#ffffff',
+        name: 'Paimal',
+        short_name: 'Paimal',
+        description: 'Paimal — Field Service Management',
+        theme_color: '#E4881F',
+        background_color: '#FBFAF7',
         display: 'standalone',
         start_url: '/',
         icons: [

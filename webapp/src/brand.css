@@ -1,0 +1,25 @@
+/* Paimal brand layer: warm ground, type smoothing, and the living-mark motion. */
+:root { color-scheme: light; }
+
+body {
+  margin: 0;
+  background: #FBFAF7;
+  color: #201C16;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* The mark's checkmark, animatable. Default state is fully drawn (offset 0),
+   so anything that opts out of motion still shows a complete mark. */
+.pm-chk { stroke-dasharray: 26; stroke-dashoffset: 0; }
+.pm-tick-path { stroke-dasharray: 46; stroke-dashoffset: 0; }
+
+@keyframes pm-draw { from { stroke-dashoffset: var(--pml, 26); } to { stroke-dashoffset: 0; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .pm-hover { cursor: pointer; }
+  .pm-hover:hover .pm-chk { animation: pm-draw .5s cubic-bezier(.6,.1,.2,1) forwards; }
+  .pm-hover:hover .pm-tick-path { animation: pm-draw .5s cubic-bezier(.6,.1,.2,1) forwards; }
+  .pm-drawin .pm-chk { stroke-dashoffset: 26; animation: pm-draw .7s .15s cubic-bezier(.6,.1,.2,1) forwards; }
+}

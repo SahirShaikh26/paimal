@@ -4,15 +4,17 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import api from '../api/client';
 import colors from '../theme';
+import { PaimalWordmark } from '../components/PaimalMark';
 
 const s = {
   page:    { minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:colors.bg, padding:'20px 16px' },
-  card:    { background:colors.white, borderRadius:12, padding:40, width:'100%', maxWidth:420, boxShadow:'0 4px 24px rgba(0,0,0,.1)' },
-  logo:    { textAlign:'center', fontSize:28, fontWeight:800, color:colors.navy, marginBottom:8 },
-  sub:     { textAlign:'center', color:colors.textMuted, fontSize:14, marginBottom:32 },
+  card:    { background:colors.white, borderRadius:16, padding:40, width:'100%', maxWidth:420, boxShadow:'0 4px 24px rgba(28,24,18,.1)', border:`1px solid ${colors.border}` },
+  logo:    { display:'flex', justifyContent:'center', marginBottom:10 },
+  sub:     { textAlign:'center', color:colors.textMuted, fontSize:14, marginBottom:6 },
+  tagline: { textAlign:'center', color:colors.accent, fontSize:14, fontWeight:600, marginBottom:30 },
   label:   { display:'block', fontSize:13, fontWeight:600, color:colors.text, marginBottom:6 },
   input:   { width:'100%', padding:'10px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:8, fontSize:14, outline:'none', marginBottom:16, boxSizing:'border-box' },
-  btn:     { width:'100%', padding:12, background:colors.blue, color:colors.white, border:'none', borderRadius:8, fontSize:15, fontWeight:600, cursor:'pointer', marginTop:4 },
+  btn:     { width:'100%', padding:12, background:colors.navy, color:colors.white, border:'none', borderRadius:8, fontSize:15, fontWeight:600, cursor:'pointer', marginTop:4 },
   link:    { textAlign:'center', marginTop:20, fontSize:13, color:colors.textMuted },
   linkBtn: { color:colors.blue, fontWeight:600, cursor:'pointer', background:'none', border:'none', fontSize:13, padding:0 },
   divider: { textAlign:'center', color:colors.textFaint, fontSize:12, margin:'8px 0' },
@@ -73,8 +75,8 @@ export default function Login() {
     return (
       <div style={s.page}>
         <div style={s.card}>
-          <div style={s.logo}>⚡ FieldPilot</div>
-          <div style={s.sub}>Register your company</div>
+          <div style={s.logo}><PaimalWordmark size={44} fontSize={28} /></div>
+          <div style={{ ...s.sub, marginBottom: 30 }}>Register your company</div>
           <form onSubmit={handleRegister}>
             <label style={s.label}>Company Name</label>
             <input style={s.input} value={companyName} onChange={e => setCompanyName(e.target.value)} required placeholder="Acme Field Services" />
@@ -102,8 +104,9 @@ export default function Login() {
   return (
     <div style={s.page}>
       <div style={s.card}>
-        <div style={s.logo}>⚡ FieldPilot</div>
+        <div style={s.logo}><PaimalWordmark size={44} fontSize={28} /></div>
         <div style={s.sub}>Field Service Management</div>
+        <div style={s.tagline}>Kaam ka gyaan ho, sahi pehchaan ho!</div>
         <form onSubmit={handleLogin}>
           <label style={s.label}>Email</label>
           <input style={s.input} type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@company.com" />
@@ -114,7 +117,7 @@ export default function Login() {
           </button>
         </form>
         <div style={s.link}>
-          New to FieldPilot?{' '}
+          New to Paimal?{' '}
           <button style={s.linkBtn} onClick={() => setMode('register')}>Register your company</button>
         </div>
       </div>

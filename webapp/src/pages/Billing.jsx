@@ -56,7 +56,7 @@ export default function Billing() {
   return (
     <div>
       <h1 style={s.h1}>Billing & Subscription</h1>
-      <p style={s.sub}>Manage your FieldPilot plan and team seats · pay via UPI, card, or netbanking</p>
+      <p style={s.sub}>Manage your Paimal plan and team seats · pay via UPI, card, or netbanking</p>
 
       {isLoading ? <p>Loading…</p> : (
         <>

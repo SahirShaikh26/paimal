@@ -104,7 +104,7 @@ export default function Dashboard() {
   return (
     <div style={{ maxWidth:1100 }}>
       {/* Profile greeting hero — mirrors the mobile Home card */}
-      <div style={{ display:'flex', alignItems:'center', gap:16, background:`linear-gradient(135deg, ${colors.navy}, #16305a)`, borderRadius:18, padding:'22px 24px', boxShadow:'0 4px 14px rgba(30,58,95,.25)' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:16, background:`linear-gradient(135deg, ${colors.navy}, #33291D)`, borderRadius:18, padding:'22px 24px', boxShadow:'0 6px 18px rgba(32,28,22,.28)' }}>
         <div style={{ width:64, height:64, borderRadius:'50%', background:'rgba(255,255,255,.92)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
           <span style={{ fontSize:24, fontWeight:800, color:colors.navy }}>{initials}</span>
         </div>

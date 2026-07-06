@@ -12,7 +12,7 @@ const s = {
   filter:{ display:'flex', gap:12, alignItems:'center', marginBottom:24, flexWrap:'wrap' },
   label: { fontSize:13, color:colors.textMuted },
   input: { padding:'7px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:13 },
-  btn:   { padding:'8px 16px', background:colors.blue, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
+  btn:   { padding:'8px 16px', background:colors.navy, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
   th:    { textAlign:'left', padding:'8px 12px', color:colors.textMuted, fontWeight:600, fontSize:12, textTransform:'uppercase', borderBottom:`2px solid ${colors.border}` },
   td:    { padding:'8px 12px', fontSize:13, borderBottom:`1px solid ${colors.bgAlt}` },
 };

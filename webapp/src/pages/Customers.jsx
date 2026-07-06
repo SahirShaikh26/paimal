@@ -9,7 +9,7 @@ const s = {
   h1:    { fontSize:22, fontWeight:700, color:colors.navy, marginBottom:20 },
   toolbar:{ display:'flex', gap:12, marginBottom:16 },
   input: { padding:'8px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:13, width:'100%', maxWidth:360 },
-  btn:   { padding:'8px 16px', background:colors.blue, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
+  btn:   { padding:'8px 16px', background:colors.navy, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
   table: { width:'100%', borderCollapse:'collapse', background:colors.white, borderRadius:10, overflow:'hidden', boxShadow:'0 1px 4px rgba(0,0,0,.08)' },
   th:    { padding:'10px 14px', background:colors.bgSlate, textAlign:'left', fontSize:12, fontWeight:700, color:colors.textMuted, borderBottom:`1px solid ${colors.border}`, textTransform:'uppercase' },
   td:    { padding:'10px 14px', fontSize:13, borderBottom:`1px solid ${colors.bgAlt}`, color:colors.text },

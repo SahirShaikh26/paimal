@@ -17,7 +17,7 @@ const s = {
   input: { width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14 },
   select:{ width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14 },
   textarea:{ width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14, resize:'vertical' },
-  btn:   { padding:'10px 24px', background:colors.blue, color:colors.white, border:'none', borderRadius:7, fontSize:14, fontWeight:600, cursor:'pointer' },
+  btn:   { padding:'10px 24px', background:colors.navy, color:colors.white, border:'none', borderRadius:7, fontSize:14, fontWeight:600, cursor:'pointer' },
   btnSecondary: { padding:'10px 24px', background:colors.bgAlt, color:colors.text, border:'none', borderRadius:7, fontSize:14, cursor:'pointer', marginRight:12 },
 };
 

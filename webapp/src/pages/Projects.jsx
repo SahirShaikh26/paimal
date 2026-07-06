@@ -22,7 +22,7 @@ const s = {
   badge: { display:'inline-block', padding:'3px 10px', borderRadius:20, fontSize:12, fontWeight:600, marginBottom:12 },
   name:  { fontSize:16, fontWeight:700, color:colors.navy, marginBottom:6 },
   meta:  { fontSize:13, color:colors.textMuted, marginBottom:4 },
-  btn:   { padding:'8px 16px', background:colors.blue, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
+  btn:   { padding:'8px 16px', background:colors.navy, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
   modal: { position:'fixed', inset:0, background:'rgba(0,0,0,.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 },
   mcard: { background:colors.white, borderRadius:12, padding:32, width:'min(480px, calc(100vw - 32px))', maxHeight:'90vh', overflowY:'auto' },
   input: { width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14, marginBottom:12 },

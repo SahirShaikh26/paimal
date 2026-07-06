@@ -15,7 +15,7 @@ const s = {
   badge: { display:'inline-block', padding:'3px 10px', borderRadius:20, fontSize:11, fontWeight:700, marginBottom:10 },
   name:  { fontSize:16, fontWeight:700, color:colors.navy, marginBottom:4 },
   meta:  { fontSize:13, color:colors.textMuted, marginBottom:3 },
-  btn:   { padding:'8px 16px', background:colors.blue, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
+  btn:   { padding:'8px 16px', background:colors.navy, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
   modal: { position:'fixed', inset:0, background:'rgba(0,0,0,.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 },
   mcard: { background:colors.white, borderRadius:12, padding:32, width:'min(440px, calc(100vw - 32px))', maxHeight:'90vh', overflowY:'auto' },
   label: { display:'block', fontSize:13, fontWeight:600, color:colors.text, marginBottom:5 },

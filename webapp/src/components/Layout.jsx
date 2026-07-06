@@ -3,6 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useIsMobile } from '../hooks/useIsMobile';
 import colors from '../theme';
+import { PaimalMark } from './PaimalMark';
 
 const OWNER_EMAILS = (import.meta.env.VITE_OWNER_EMAILS || '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
 
@@ -70,8 +71,11 @@ export default function Layout() {
           transition: 'transform 0.25s ease',
         } : {}),
       }}>
-        <div style={{ padding:'20px 20px 24px', fontSize:20, fontWeight:700, letterSpacing:1, borderBottom:'1px solid rgba(255,255,255,.15)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-          <span>⚡ FieldPilot</span>
+        <div style={{ padding:'18px 20px 22px', fontSize:20, fontWeight:750, letterSpacing:'-.02em', borderBottom:'1px solid rgba(255,255,255,.12)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <span className="pm-hover" style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <PaimalMark size={30} tile="#2B241B" glyph={colors.accent} />
+            Paimal
+          </span>
           {isMobile && (
             <button
               onClick={closeSidebar}
@@ -113,7 +117,10 @@ export default function Layout() {
                 style={{ background:'none', border:'none', cursor:'pointer', padding:'4px 6px', fontSize:22, color:colors.navy, lineHeight:1 }}
               >☰</button>
             )}
-            <span style={{ fontWeight:700, color:colors.navy, fontSize:16 }}>⚡ FieldPilot</span>
+            <span className="pm-hover" style={{ display:'flex', alignItems:'center', gap:9, fontWeight:750, color:colors.navy, fontSize:17, letterSpacing:'-.02em' }}>
+              <PaimalMark size={26} />
+              Paimal
+            </span>
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:14 }}>
             <span style={{ fontSize:18, position:'relative' }} title="Notifications">🔔
