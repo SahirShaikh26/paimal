@@ -1,5 +1,5 @@
 // Direct unsigned upload from the device — images never pass through the
-// FieldPilot backend, which has no file storage of its own. Requires a free
+// Paimal backend, which has no file storage of its own. Requires a free
 // Cloudinary account with an unsigned upload preset configured.
 const CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET;

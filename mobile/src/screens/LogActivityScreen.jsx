@@ -248,7 +248,7 @@ const s = StyleSheet.create({
   half:       { flex:1 },
   pickerWrap: { backgroundColor:COLORS.white, borderWidth:1, borderColor:COLORS.borderInput, borderRadius:8, overflow:'hidden' },
   row:        { flexDirection:'row', gap:12 },
-  btn:        { backgroundColor:COLORS.blue, borderRadius:12, padding:16, alignItems:'center', marginTop:8 },
+  btn:        { backgroundColor:COLORS.navy, borderRadius:12, padding:16, alignItems:'center', marginTop:8 },
   btnDisabled:{ opacity:.6 },
   btnText:    { color:COLORS.white, fontSize:16, fontWeight:'700' },
   visitBanner:{ backgroundColor:COLORS.blueBg, borderRadius:8, padding:10, marginBottom:14 },

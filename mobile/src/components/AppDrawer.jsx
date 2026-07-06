@@ -89,15 +89,15 @@ export default function AppDrawer({ visible, onClose, navigation }) {
 
 const s = StyleSheet.create({
   panel: { position: 'absolute', top: 0, bottom: 0, left: 0, backgroundColor: COLORS.white, elevation: 16, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 12, shadowOffset: { width: 2, height: 0 } },
-  head: { backgroundColor: COLORS.blue, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, marginTop: -12 },
+  head: { backgroundColor: COLORS.navy, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, marginTop: -12 },
   avatar: { width: 52, height: 52, borderRadius: 26, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: COLORS.white, fontSize: 18, fontWeight: '800' },
   welcome: { color: 'rgba(255,255,255,0.9)', fontSize: 14 },
   name: { color: COLORS.white, fontSize: 18, fontWeight: '800' },
-  item: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 15, paddingHorizontal: 22, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
+  item: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 15, paddingHorizontal: 22, borderBottomWidth: 1, borderBottomColor: '#F1EEE8' },
   itemIcon: { fontSize: 18, width: 24, textAlign: 'center' },
   itemLabel: { fontSize: 15.5, color: COLORS.textDark, fontWeight: '500' },
-  footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#dbe6f5', paddingHorizontal: 22, paddingTop: 14 },
+  footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#F6EEDF', paddingHorizontal: 22, paddingTop: 14 },
   rate: { color: COLORS.blue, fontWeight: '700', fontSize: 15 },
   logoutBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   logoutLabel: { color: COLORS.textDark, fontWeight: '700', fontSize: 15 },

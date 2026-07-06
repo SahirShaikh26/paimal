@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "FieldPilot",
+    "name": "Paimal",
     "slug": "fieldpilot",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -34,15 +34,15 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "FieldPilot needs location for check-in."
+          "locationAlwaysAndWhenInUsePermission": "Paimal needs location for check-in."
         }
       ],
       "expo-document-picker",
       [
         "expo-image-picker",
         {
-          "photosPermission": "FieldPilot needs photo library access so you can attach photos to activity logs.",
-          "cameraPermission": "FieldPilot needs camera access so you can take photos of completed work."
+          "photosPermission": "Paimal needs photo library access so you can attach photos to activity logs.",
+          "cameraPermission": "Paimal needs camera access so you can take photos of completed work."
         }
       ],
       [
@@ -57,8 +57,8 @@
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "FieldPilot needs microphone access so you can dictate activity notes by voice.",
-          "speechRecognitionPermission": "FieldPilot needs speech recognition access to convert your dictated notes into text."
+          "microphonePermission": "Paimal needs microphone access so you can dictate activity notes by voice.",
+          "speechRecognitionPermission": "Paimal needs speech recognition access to convert your dictated notes into text."
         }
       ]
     ],
