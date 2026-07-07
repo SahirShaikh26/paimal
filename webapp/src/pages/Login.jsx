@@ -75,7 +75,7 @@ export default function Login() {
     return (
       <div style={s.page}>
         <div style={s.card}>
-          <div style={s.logo}><PaimalWordmark size={44} fontSize={28} /></div>
+          <div style={s.logo}><PaimalWordmark size={44} fontSize={28} drawIn /></div>
           <div style={{ ...s.sub, marginBottom: 30 }}>Register your company</div>
           <form onSubmit={handleRegister}>
             <label style={s.label}>Company Name</label>

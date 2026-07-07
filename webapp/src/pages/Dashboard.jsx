@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfMonth } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +8,26 @@ import colors from '../theme';
 import Icon from '../components/Icon';
 
 const card = { background:colors.white, borderRadius:14, padding:20, boxShadow:'0 1px 4px rgba(0,0,0,.08)' };
+const reduceMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Animate a number from 0 → `to` on mount (easeOutCubic). Respects reduced motion.
+function CountUp({ to, fmt = (n) => Math.round(n).toLocaleString('en-IN'), duration = 850 }) {
+  const [v, setV] = useState(reduceMotion ? to : 0);
+  const raf = useRef();
+  useEffect(() => {
+    if (reduceMotion || typeof to !== 'number' || !isFinite(to)) { setV(to); return; }
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      setV(to * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) raf.current = requestAnimationFrame(tick);
+      else setV(to);
+    };
+    raf.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf.current);
+  }, [to, duration]);
+  return <>{fmt(v)}</>;
+}
 
 function greeting() {
   const h = new Date().getHours();
@@ -53,10 +74,13 @@ function BillingBars({ data }) {
   );
 }
 
-function MiniStat({ value, label, color = colors.navy }) {
+function MiniStat({ value, label, color = colors.navy, prefix = '', fmt }) {
+  const isNum = typeof value === 'number' && isFinite(value);
   return (
     <div style={{ ...card, padding:'16px 10px', textAlign:'center', boxShadow:'0 1px 3px rgba(0,0,0,.06)' }}>
-      <div style={{ fontSize:24, fontWeight:800, color }}>{value ?? '—'}</div>
+      <div style={{ fontSize:24, fontWeight:800, color }}>
+        {isNum ? <>{prefix}<CountUp to={value} fmt={fmt} /></> : '—'}
+      </div>
       <div style={{ fontSize:12, color:colors.textMuted, marginTop:4 }}>{label}</div>
     </div>
   );
@@ -105,12 +129,13 @@ export default function Dashboard() {
   return (
     <div style={{ maxWidth:1100 }}>
       {/* Profile greeting hero — mirrors the mobile Home card */}
-      <div style={{ display:'flex', alignItems:'center', gap:16, background:`linear-gradient(135deg, ${colors.navy}, #33291D)`, borderRadius:18, padding:'22px 24px', boxShadow:'0 6px 18px rgba(32,28,22,.28)' }}>
-        <div style={{ width:64, height:64, borderRadius:'50%', background:'rgba(255,255,255,.92)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+      <div className="fp-rise" style={{ position:'relative', overflow:'hidden', display:'flex', alignItems:'center', gap:16, background:`linear-gradient(135deg, ${colors.navy}, #33291D)`, borderRadius:18, padding:'22px 24px', boxShadow:'0 6px 18px rgba(32,28,22,.28)' }}>
+        <div style={{ position:'absolute', inset:0, background:'radial-gradient(560px 220px at 92% -30%, rgba(246,166,42,.30), transparent 62%)', pointerEvents:'none' }} />
+        <div style={{ width:64, height:64, borderRadius:'50%', background:'rgba(255,255,255,.92)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, position:'relative' }}>
           <span style={{ fontSize:24, fontWeight:800, color:colors.navy }}>{initials}</span>
         </div>
-        <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ color:colors.orange, fontSize:19, fontWeight:800 }}>{greeting()}</div>
+        <div style={{ flex:1, minWidth:0, position:'relative' }}>
+          <div style={{ color:colors.orangeLight, fontSize:19, fontWeight:800 }}>{greeting()}</div>
           <div style={{ color:colors.white, fontSize:22, fontWeight:800, marginTop:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{(user?.name || 'User').toUpperCase()}</div>
           <div style={{ color:'rgba(255,255,255,.75)', fontSize:13, fontWeight:600, marginTop:2 }}>{(user?.job_title || user?.role || '').toUpperCase()}</div>
         </div>
@@ -118,13 +143,13 @@ export default function Dashboard() {
       </div>
 
       {/* Hours logged today + Today's visits */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))', gap:16, marginTop:16 }}>
+      <div className="fp-rise" style={{ animationDelay:'.07s', display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))', gap:16, marginTop:16 }}>
         <div style={{ ...card, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div>
             <div style={{ fontSize:15, color:colors.textDark, fontWeight:600 }}>Hours Logged</div>
             <div style={{ fontSize:12, color:colors.textMuted, marginTop:3 }}>{format(new Date(), 'EEE, MMM d').toUpperCase()}</div>
           </div>
-          <div style={{ fontSize:26, fontWeight:800, color:colors.blue }}>{hoursToday.toFixed(2)} <span style={{ fontSize:14, fontWeight:700, color:colors.textMuted }}>Hrs</span></div>
+          <div style={{ fontSize:26, fontWeight:800, color:colors.blue }}><CountUp to={hoursToday} fmt={(n) => n.toFixed(2)} /> <span style={{ fontSize:14, fontWeight:700, color:colors.textMuted }}>Hrs</span></div>
         </div>
         <div
           onClick={() => visitCount && navigate('/schedule')}
@@ -138,29 +163,31 @@ export default function Dashboard() {
       {isLoading ? <p style={{ marginTop:24 }}>Loading…</p> : (
         <>
           {/* Month-to-date mini stats */}
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))', gap:14, marginTop:16 }}>
-            <MiniStat value={t?.total_logs} label="Logs (MTD)" />
-            <MiniStat value={t?.total_hours != null ? Number(t.total_hours).toFixed(0) : 0} label="Hours" color={colors.green} />
-            <MiniStat value={t?.total_billing != null ? `₹${Number(t.total_billing).toLocaleString('en-IN')}` : '₹0'} label="Billing" color={colors.amber} />
-            <MiniStat value={t?.active_engineers} label="Engineers" color={colors.purple} />
-            <MiniStat value={t?.customers_served} label="Customers" color={colors.cyan} />
+          <div className="fp-rise" style={{ animationDelay:'.14s', display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))', gap:14, marginTop:16 }}>
+            <MiniStat value={t?.total_logs != null ? Number(t.total_logs) : null} label="Logs (MTD)" />
+            <MiniStat value={t?.total_hours != null ? Number(t.total_hours) : 0} label="Hours" color={colors.green} />
+            <MiniStat value={Number(t?.total_billing || 0)} prefix="₹" label="Billing" color={colors.amber} />
+            <MiniStat value={t?.active_engineers != null ? Number(t.active_engineers) : null} label="Engineers" color={colors.purple} />
+            <MiniStat value={t?.customers_served != null ? Number(t.customers_served) : null} label="Customers" color={colors.cyan} />
           </div>
 
           {/* Quick-action tile grid — the mobile Home signature */}
+          <div className="fp-rise" style={{ animationDelay:'.2s' }}>
           <h2 style={{ fontSize:15, fontWeight:700, color:colors.navy, margin:'26px 0 14px' }}>Quick Actions</h2>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(120px,1fr))', gap:16 }}>
             {tiles.map((tile) => (
               <button
                 key={tile.label}
                 onClick={() => navigate(tile.to)}
-                style={{ ...card, padding:'18px 8px', display:'flex', flexDirection:'column', alignItems:'center', gap:10, border:'none', cursor:'pointer', transition:'transform .12s ease, box-shadow .12s ease' }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,.12)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,.08)'; }}
+                style={{ ...card, padding:'18px 8px', display:'flex', flexDirection:'column', alignItems:'center', gap:10, border:'none', cursor:'pointer', transition:'transform .14s ease, box-shadow .14s ease' }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 22px rgba(228,136,31,.18)'; const ic = e.currentTarget.firstChild; if (ic) { ic.style.transform = 'scale(1.08)'; ic.style.background = colors.accent; ic.style.color = colors.white; } }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,.08)'; const ic = e.currentTarget.firstChild; if (ic) { ic.style.transform = 'none'; ic.style.background = tile.bg; ic.style.color = colors.navy; } }}
               >
-                <div style={{ width:56, height:56, borderRadius:16, background:tile.bg, display:'flex', alignItems:'center', justifyContent:'center', color:colors.navy }}><Icon name={tile.icon} size={24} strokeWidth={1.8} /></div>
+                <div style={{ width:56, height:56, borderRadius:16, background:tile.bg, display:'flex', alignItems:'center', justifyContent:'center', color:colors.navy, transition:'transform .14s ease, background .14s ease, color .14s ease' }}><Icon name={tile.icon} size={24} strokeWidth={1.8} /></div>
                 <span style={{ fontSize:13, color:colors.textDark, fontWeight:600, textAlign:'center' }}>{tile.label}</span>
               </button>
             ))}
+          </div>
           </div>
 
           {data?.by_month?.length > 0 && (

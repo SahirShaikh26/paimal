@@ -26,10 +26,10 @@ export function Tick({ size = 18, color = 'currentColor', strokeWidth = 8, hover
 }
 
 // Wordmark lockup: mark + "Paimal".
-export function PaimalWordmark({ size = 30, color = '#201C16', tile = '#201C16', glyph = '#E4881F', hover = true, gap = 10, fontSize }) {
+export function PaimalWordmark({ size = 30, color = '#201C16', tile = '#201C16', glyph = '#E4881F', hover = true, drawIn = false, gap = 10, fontSize }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap }}>
-      <PaimalMark size={size} tile={tile} glyph={glyph} hover={hover} />
+      <PaimalMark size={size} tile={tile} glyph={glyph} hover={hover} drawIn={drawIn} />
       <span style={{ fontWeight: 750, letterSpacing: '-0.03em', color, fontSize: fontSize || Math.round(size * 0.62) }}>Paimal</span>
     </span>
   );
