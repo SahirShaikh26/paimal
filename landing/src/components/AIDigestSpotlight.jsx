@@ -26,13 +26,13 @@ export default function AIDigestSpotlight() {
         </div>
 
         <div>
-          <span className="eyebrow" style={{ background: '#ede9fe', color: '#7c3aed' }}>WHAT NO ONE ELSE HAS</span>
-          <h2 style={{ fontSize: 32, fontWeight: 800, color: '#1e3a5f', letterSpacing: '-.01em', marginBottom: 14 }}>
+          <span className="eyebrow" style={{ background: '#FBEFD9', color: '#C2740C' }}>WHAT NO ONE ELSE HAS</span>
+          <h2 style={{ fontSize: 32, fontWeight: 800, color: '#201C16', letterSpacing: '-.01em', marginBottom: 14 }}>
             Your AI Daily Digest does the reporting for you
           </h2>
           <p style={{ fontSize: 15.5, color: '#64748b', lineHeight: 1.7, marginBottom: 18 }}>
             Every other field-service tool just collects logs — someone still has to read through
-            dozens of entries to figure out what happened. FieldPilot generates a plain-English
+            dozens of entries to figure out what happened. Paimal generates a plain-English
             summary on demand, automatically flags recurring machine faults and engineers logging
             unusually low hours, surfaces machines with warranties about to expire, and drafts a
             ready-to-send customer update. What used to take a manager an hour now takes one tap.

@@ -104,13 +104,13 @@ const INDUSTRIES = [
 ];
 
 const s = {
-  hero: { padding: '64px 0 48px', textAlign: 'center', background: 'radial-gradient(circle at 50% 0%, #eef2ff 0%, #fff 60%)' },
-  h1: { fontSize: 38, fontWeight: 800, color: '#1e3a5f', letterSpacing: '-.01em', marginBottom: 14 },
+  hero: { padding: '64px 0 48px', textAlign: 'center', background: 'radial-gradient(circle at 50% 0%, #FDECD2 0%, #fff 60%)' },
+  h1: { fontSize: 38, fontWeight: 800, color: '#201C16', letterSpacing: '-.01em', marginBottom: 14 },
   sub: { fontSize: 16, color: '#64748b', maxWidth: 600, margin: '0 auto' },
   cardHead: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 },
   icon: { fontSize: 28 },
-  name: { fontSize: 17, fontWeight: 700, color: '#1e3a5f' },
-  blurb: { fontSize: 13, color: '#94a3b8', marginBottom: 14, marginLeft: 40 },
+  name: { fontSize: 17, fontWeight: 700, color: '#201C16' },
+  blurb: { fontSize: 13, color: '#A79E8C', marginBottom: 14, marginLeft: 40 },
   point: { display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13.5, color: '#374151', padding: '5px 0' },
   notListed: { textAlign: 'center', marginTop: 56, padding: '32px 24px', background: '#f0f4ff', borderRadius: 16 },
 };
@@ -123,7 +123,7 @@ export default function Industries() {
           <span className="eyebrow">USE CASES</span>
           <h1 style={s.h1}>One platform, every trade that dispatches technicians</h1>
           <p style={s.sub}>
-            FieldPilot isn't built for one industry — it's built around what every field service
+            Paimal isn't built for one industry — it's built around what every field service
             business actually needs: track customers, assets, jobs, and the people doing the work.
             Here's how different trades use it.
           </p>
@@ -151,12 +151,12 @@ export default function Industries() {
           </div>
 
           <div style={s.notListed}>
-            <h3 style={{ fontSize: 19, fontWeight: 700, color: '#1e3a5f', marginBottom: 8 }}>
+            <h3 style={{ fontSize: 19, fontWeight: 700, color: '#201C16', marginBottom: 8 }}>
               Don't see your trade?
             </h3>
             <p style={{ fontSize: 14, color: '#64748b', marginBottom: 18 }}>
               If your business sends people to job sites and needs to track who did what, where,
-              and for whom — FieldPilot fits. Talk to us about your specific workflow.
+              and for whom — Paimal fits. Talk to us about your specific workflow.
             </p>
             <a href={SIGNUP_URL} className="btn btn-primary btn-lg">Start Free Trial</a>
           </div>

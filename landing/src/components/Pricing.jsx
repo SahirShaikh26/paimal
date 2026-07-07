@@ -51,13 +51,13 @@ export default function Pricing() {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 40 }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: annual ? '#94a3b8' : '#1e3a5f' }}>Monthly</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: annual ? '#A79E8C' : '#201C16' }}>Monthly</span>
           <button
             onClick={() => setAnnual((a) => !a)}
             aria-label="Toggle annual billing"
             style={{
               width: 46, height: 26, borderRadius: 20, border: 'none', cursor: 'pointer',
-              background: annual ? 'linear-gradient(135deg,#2563eb,#4f46e5)' : '#cbd5e1',
+              background: annual ? '#201C16' : '#DCD4C6',
               position: 'relative', transition: 'background .2s ease',
             }}
           >
@@ -67,7 +67,7 @@ export default function Pricing() {
               transition: 'left .2s ease', boxShadow: '0 1px 3px rgba(0,0,0,.3)',
             }} />
           </button>
-          <span style={{ fontSize: 14, fontWeight: 600, color: annual ? '#1e3a5f' : '#94a3b8' }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: annual ? '#201C16' : '#A79E8C' }}>
             Annual <span style={{ color: '#16a34a', fontWeight: 700 }}>(save ~16%)</span>
           </span>
         </div>
@@ -80,7 +80,7 @@ export default function Pricing() {
                 {t.featured && <span className="price-tag">MOST POPULAR</span>}
                 <h3>{t.name}</h3>
                 <div className="price-blurb">{t.blurb}</div>
-                <div style={{ fontSize: 32, fontWeight: 800, color: '#1e3a5f' }}>
+                <div style={{ fontSize: 32, fontWeight: 800, color: '#201C16' }}>
                   {price === null ? 'Custom' : `₹${price}`}
                   {price !== null && <span style={{ fontSize: 14, fontWeight: 600, color: '#64748b' }}> /seat/mo</span>}
                 </div>

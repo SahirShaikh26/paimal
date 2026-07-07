@@ -10,10 +10,11 @@ export default function Hero() {
             Run your field operations <span>without the spreadsheets</span>
           </h1>
           <p>
-            FieldPilot gives growing field service companies one place to track engineers,
+            Paimal gives growing field service companies one place to track engineers,
             projects, customers, and daily activity — with an AI digest that writes your
             reports for you. Built for teams of 5 to 500, works offline in the field.
           </p>
+          <div className="hero-tagline">Kaam ka gyaan ho, sahi pehchaan ho!</div>
           <div className="hero-ctas">
             <a href={SIGNUP_URL} className="btn btn-primary btn-lg">Start Free 14-Day Trial</a>
             <a href={LOGIN_URL} className="btn btn-ghost btn-lg">Log In</a>
@@ -54,7 +55,7 @@ export default function Hero() {
           </div>
           <div className="mockup-list-row" style={{ marginBottom: 0 }}>
             <span>🗂️ Acme Corp — Installation</span>
-            <span className="mockup-badge" style={{ background: '#dbeafe', color: '#1d4ed8' }}>In Progress</span>
+            <span className="mockup-badge" style={{ background: '#FBEFD9', color: '#C2740C' }}>In Progress</span>
           </div>
         </div>
       </div>

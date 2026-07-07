@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import { LOGIN_URL, SIGNUP_URL } from '../config';
+import PaimalLogo from './PaimalLogo';
 
 export default function Nav() {
   return (
     <header className="nav">
       <div className="nav-inner">
-        <Link to="/" className="logo" style={{ textDecoration: 'none' }}>⚡ FieldPilot</Link>
+        <Link to="/" style={{ textDecoration: 'none' }}><PaimalLogo /></Link>
         <nav className="nav-links">
           <a href="/#features">Features</a>
           <Link to="/industries">Industries</Link>
