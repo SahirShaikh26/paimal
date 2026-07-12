@@ -110,10 +110,10 @@ router.get('/:id/attendance', async (req, res) => {
   try {
     const { rows } = await db.query(
       `SELECT * FROM attendance
-       WHERE engineer_id=$1
-       ${month ? "AND TO_CHAR(date,'YYYY-MM')=$2" : ''}
+       WHERE engineer_id=$1 AND tenant_id=$2
+       ${month ? "AND TO_CHAR(date,'YYYY-MM')=$3" : ''}
        ORDER BY date DESC`,
-      month ? [req.params.id, month] : [req.params.id]
+      month ? [req.params.id, req.tenantId, month] : [req.params.id, req.tenantId]
     );
     res.json(rows);
   } catch (err) {
@@ -136,9 +136,9 @@ router.post('/attendance/checkin', async (req, res) => {
     }
 
     const { rows } = await db.query(
-      `INSERT INTO attendance (engineer_id, date, check_in, lat, lng, location)
-       VALUES ($1,$2,NOW(),$3,$4,$5) RETURNING *`,
-      [req.user.id, today, lat, lng, location]
+      `INSERT INTO attendance (engineer_id, tenant_id, date, check_in, lat, lng, location)
+       VALUES ($1,$2,$3,NOW(),$4,$5,$6) RETURNING *`,
+      [req.user.id, req.tenantId, today, lat, lng, location]
     );
     res.status(201).json(rows[0]);
   } catch (err) {

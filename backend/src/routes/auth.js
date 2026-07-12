@@ -73,6 +73,14 @@ router.post('/register-tenant', async (req, res) => {
          ($1,'LV','Leave','#475569',8)`,
       [tenant.id]
     );
+    await db.query(
+      `INSERT INTO leave_types (tenant_id, name, code, annual_quota, paid, sort_order) VALUES
+         ($1,'Casual Leave','CL',12.0,true,1),
+         ($1,'Sick Leave','SL',8.0,true,2),
+         ($1,'Earned Leave','EL',15.0,true,3),
+         ($1,'Leave Without Pay','LWP',0.0,false,4)`,
+      [tenant.id]
+    );
     await db.query('COMMIT');
 
     // No Razorpay customer pre-creation needed — customer_id attaches
