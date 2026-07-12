@@ -1,3 +1,5 @@
+import Icon from './Icon';
+
 const ITEMS = [
   '14-day free trial',
   'No credit card required',
@@ -10,7 +12,7 @@ export default function TrustStrip() {
     <div className="trust-strip">
       <div className="container">
         {ITEMS.map((item) => (
-          <span key={item}>✓ {item}</span>
+          <span key={item}><Icon name="check" size={16} stroke={2.4} /> {item}</span>
         ))}
       </div>
     </div>

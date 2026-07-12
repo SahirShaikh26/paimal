@@ -112,7 +112,7 @@ const s = {
   name: { fontSize: 17, fontWeight: 700, color: '#201C16' },
   blurb: { fontSize: 13, color: '#A79E8C', marginBottom: 14, marginLeft: 40 },
   point: { display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13.5, color: '#374151', padding: '5px 0' },
-  notListed: { textAlign: 'center', marginTop: 56, padding: '32px 24px', background: '#f0f4ff', borderRadius: 16 },
+  notListed: { textAlign: 'center', marginTop: 56, padding: '36px 24px', background: 'linear-gradient(135deg, #FDECD2, #FBFAF7)', border: '1px solid #F2DFBE', borderRadius: 18 },
 };
 
 export default function Industries() {
@@ -120,7 +120,7 @@ export default function Industries() {
     <>
       <section style={s.hero}>
         <div className="container">
-          <span className="eyebrow">USE CASES</span>
+          <span className="eyebrow"><span className="dot" /> Use cases</span>
           <h1 style={s.h1}>One platform, every trade that dispatches technicians</h1>
           <p style={s.sub}>
             Paimal isn't built for one industry — it's built around what every field service

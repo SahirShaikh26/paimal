@@ -3,67 +3,99 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Privacy Policy — FieldPilot</title>
+  <title>Privacy Policy — Paimal</title>
   <style>
+    :root {
+      --ink: #201C16;
+      --marigold: #C2740C;
+      --text: #3f3a32;
+      --muted: #8B8375;
+      --border: #EAE4DA;
+      --paper: #FBFAF7;
+    }
+    * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       max-width: 760px;
       margin: 0 auto;
-      padding: 48px 24px 80px;
-      color: #1e293b;
+      padding: 40px 24px 80px;
+      color: var(--text);
       line-height: 1.65;
+      background: var(--paper);
+      -webkit-font-smoothing: antialiased;
     }
-    h1 { color: #1e3a5f; font-size: 28px; margin-bottom: 4px; }
-    .updated { color: #64748b; font-size: 13px; margin-bottom: 32px; }
-    h2 { color: #1e3a5f; font-size: 18px; margin-top: 32px; margin-bottom: 10px; }
-    p, li { color: #374151; font-size: 15px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; letter-spacing: -.02em; color: var(--ink); margin-bottom: 28px; }
+    .brand .tile { width: 30px; height: 30px; border-radius: 8px; background: var(--ink); display: inline-flex; align-items: center; justify-content: center; }
+    h1 { color: var(--ink); font-size: 30px; margin: 0 0 4px; letter-spacing: -.02em; }
+    .updated { color: var(--muted); font-size: 13px; margin-bottom: 32px; font-family: ui-monospace, monospace; }
+    h2 { color: var(--ink); font-size: 18px; margin-top: 34px; margin-bottom: 10px; letter-spacing: -.01em; }
+    p, li { color: var(--text); font-size: 15px; }
     ul { padding-left: 20px; }
-    a { color: #2563eb; }
-    .back { display: inline-block; margin-bottom: 24px; color: #2563eb; text-decoration: none; font-size: 14px; font-weight: 600; }
+    li { margin-bottom: 6px; }
+    strong { color: var(--ink); }
+    a { color: var(--marigold); font-weight: 600; }
+    .back { display: inline-block; margin-bottom: 24px; color: var(--marigold); text-decoration: none; font-size: 14px; font-weight: 700; }
+    .rule { height: 1px; background: var(--border); border: none; margin: 34px 0 0; }
   </style>
 </head>
 <body>
-  <a class="back" href="/">&larr; Back to FieldPilot</a>
-  <h1>Privacy Policy</h1>
-  <p class="updated">Last updated: June 2026</p>
+  <a class="back" href="/">&larr; Back to Paimal</a>
 
-  <p>FieldPilot ("we", "our", "the app") is a field service management application for businesses and their field engineers. This policy explains what data the FieldPilot mobile app and web app collect, why, and how it's handled.</p>
+  <div class="brand">
+    <span class="tile">
+      <svg width="30" height="30" viewBox="0 0 64 64" style="color:#E4881F" aria-hidden="true">
+        <rect x="16" y="13" width="10.5" height="38" rx="5" fill="currentColor" />
+        <circle cx="30" cy="23" r="11.5" fill="currentColor" />
+        <path d="M24 23 L28.5 27.6 L37 16.4" fill="none" stroke="#201C16" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </span>
+    Paimal
+  </div>
+
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: July 2026</p>
+
+  <p>Paimal ("we", "our", "the app") is a field service management application for businesses and their field engineers. This policy explains what data the Paimal mobile app and web app collect, why, and how it's handled.</p>
 
   <h2>Information We Collect</h2>
   <ul>
     <li><strong>Account information:</strong> name, email address, and role, provided when your company creates your account.</li>
     <li><strong>Location data:</strong> with your explicit permission, your device's GPS location is recorded only at the moment you check in or check out of a work site. We do not track location in the background or at any other time.</li>
     <li><strong>Activity and work data:</strong> service logs, project details, customer and machine records, and notes that you or your team enter while using the app.</li>
-    <li><strong>Files you choose to upload:</strong> CSV files you select for bulk data import.</li>
+    <li><strong>Voice input:</strong> when you use voice dictation, speech is converted to text on your device by your operating system's speech recognition. Only the resulting text note is stored by Paimal.</li>
+    <li><strong>Files you choose to upload:</strong> photos attached to jobs and CSV files you select for bulk data import.</li>
   </ul>
 
   <h2>How We Use Information</h2>
   <ul>
-    <li>To provide core functionality: attendance tracking, activity logging, project and customer management, and reporting for your employer.</li>
+    <li>To provide core functionality: attendance tracking, activity logging, scheduling, project and customer management, quoting, invoicing, and reporting for your employer.</li>
     <li>To generate analytics and AI-assisted summaries of work activity for your organization's managers/directors.</li>
+    <li>To process subscription payments for your employer's account.</li>
     <li>To authenticate your account and keep your session secure.</li>
   </ul>
-  <p>We do not sell your data. We do not use your data for advertising. We do not share your data with third parties except the infrastructure providers strictly necessary to run the service (hosting, database, error monitoring, payment processing for your employer's subscription).</p>
+  <p>We do not sell your data. We do not use your data for advertising. We do not share your data with third parties except the infrastructure providers strictly necessary to run the service (hosting, database, error monitoring, and payment processing for your employer's subscription).</p>
 
-  <h2>Data Storage & Security</h2>
+  <h2>Data Storage &amp; Security</h2>
   <p>Data is transmitted over encrypted HTTPS connections and stored in a password-protected database. Your authentication token is stored securely on your device using the operating system's secure storage and is never shared with other apps.</p>
 
   <h2>Location Permission</h2>
   <p>The Android app requests <strong>foreground-only</strong> location access (not background location). Location is read a single time when you tap "Check In" or "Check Out" and is used solely to timestamp and geotag that attendance record for your employer.</p>
 
   <h2>Data Retention</h2>
-  <p>Your data is retained for as long as your employer's account with FieldPilot remains active, or as required by applicable law. You can request deletion of your account data by contacting your organization's administrator or us directly.</p>
+  <p>Your data is retained for as long as your employer's account with Paimal remains active, or as required by applicable law. You can request deletion of your account data by contacting your organization's administrator or us directly.</p>
 
   <h2>Your Rights</h2>
   <p>You may request access to, correction of, or deletion of your personal data by contacting us at the email below.</p>
 
   <h2>Children's Privacy</h2>
-  <p>FieldPilot is a business tool intended for employed field service personnel and is not directed at or intended for use by children under 16.</p>
+  <p>Paimal is a business tool intended for employed field service personnel and is not directed at or intended for use by children under 16.</p>
 
   <h2>Changes to This Policy</h2>
   <p>We may update this policy from time to time. Material changes will be reflected by updating the "Last updated" date above.</p>
 
   <h2>Contact</h2>
   <p>Questions about this policy or your data: <a href="mailto:sahirshaikh2603@gmail.com">sahirshaikh2603@gmail.com</a></p>
+
+  <hr class="rule" />
 </body>
 </html>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SIGNUP_URL } from '../config';
+import Reveal from './Reveal';
 
 const TIERS = [
   {
@@ -44,11 +45,11 @@ export default function Pricing() {
   return (
     <section className="section pricing-section" id="pricing">
       <div className="container">
-        <div className="section-head">
-          <span className="eyebrow">PRICING</span>
+        <Reveal className="section-head">
+          <span className="eyebrow"><span className="dot" /> Pricing</span>
           <h2>Simple, per-seat pricing</h2>
           <p>Pay only for active team members. Upgrade, downgrade, or cancel anytime. Prices exclude 18% GST.</p>
-        </div>
+        </Reveal>
 
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 40 }}>
           <span style={{ fontSize: 14, fontWeight: 600, color: annual ? '#A79E8C' : '#201C16' }}>Monthly</span>

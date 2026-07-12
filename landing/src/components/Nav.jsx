@@ -8,6 +8,7 @@ export default function Nav() {
       <div className="nav-inner">
         <Link to="/" style={{ textDecoration: 'none' }}><PaimalLogo /></Link>
         <nav className="nav-links">
+          <a href="/#platform">Platform</a>
           <a href="/#features">Features</a>
           <Link to="/industries">Industries</Link>
           <a href="/#how-it-works">How it Works</a>
