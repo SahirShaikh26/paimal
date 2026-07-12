@@ -7,8 +7,8 @@ import colors from '../theme';
 import { PaimalWordmark } from '../components/PaimalMark';
 
 const s = {
-  page:    { minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:colors.bg, padding:'20px 16px' },
-  card:    { background:colors.white, borderRadius:16, padding:40, width:'100%', maxWidth:420, boxShadow:'0 4px 24px rgba(28,24,18,.1)', border:`1px solid ${colors.border}` },
+  page:    { position:'relative', minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:colors.bg, padding:'20px 16px', overflow:'hidden' },
+  card:    { position:'relative', zIndex:1, background:colors.white, borderRadius:18, padding:40, width:'100%', maxWidth:420, boxShadow:'0 20px 60px rgba(32,28,22,.14)', border:`1px solid ${colors.border}` },
   logo:    { display:'flex', justifyContent:'center', marginBottom:10 },
   sub:     { textAlign:'center', color:colors.textMuted, fontSize:14, marginBottom:6 },
   tagline: { textAlign:'center', color:colors.accent, fontSize:14, fontWeight:600, marginBottom:30 },
@@ -71,9 +71,18 @@ export default function Login() {
     }
   };
 
+  const authBg = (
+    <div className="pm-authbg" aria-hidden="true">
+      <span className="orb o1" />
+      <span className="orb o2" />
+      <div className="glyph" />
+    </div>
+  );
+
   if (mode === 'register') {
     return (
       <div style={s.page}>
+        {authBg}
         <div style={s.card}>
           <div style={s.logo}><PaimalWordmark size={44} fontSize={28} drawIn /></div>
           <div style={{ ...s.sub, marginBottom: 30 }}>Register your company</div>
@@ -103,6 +112,7 @@ export default function Login() {
 
   return (
     <div style={s.page}>
+      {authBg}
       <div style={s.card}>
         <div style={s.logo}><PaimalWordmark size={44} fontSize={28} /></div>
         <div style={s.sub}>Field Service Management</div>

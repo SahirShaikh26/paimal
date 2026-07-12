@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import colors from '../theme';
-import Icon from '../components/Icon';
+import ColorIcon from '../components/ColorIcon';
 
 const card = { background:colors.white, borderRadius:14, padding:20, boxShadow:'0 1px 4px rgba(0,0,0,.08)' };
 const reduceMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -119,7 +119,7 @@ export default function Dashboard() {
     { label:'Activity Logs', icon:'list',     bg:colors.tileAmber,   to:'/logs' },
     { label:'Schedule',      icon:'calendar', bg:colors.tileGreen,   to:'/schedule' },
     { label:'Projects',      icon:'folder',   bg:colors.tileIndigo,  to:'/projects' },
-    { label:'Analytics',     icon:'chart',    bg:colors.tileFuchsia, to:'/analytics' },
+    { label:'Analytics',     icon:'analytics',bg:colors.tileFuchsia, to:'/analytics' },
     { label:'Customers',     icon:'building', bg:colors.tileRose,    to:'/customers' },
     { label:'Reports',       icon:'clipboard',bg:colors.tileBlue,    to:'/reports' },
     { label:'Import Data',   icon:'download',  bg:colors.tileAmber,   to:'/import', roles:['Director','Manager'] },
@@ -180,10 +180,10 @@ export default function Dashboard() {
                 key={tile.label}
                 onClick={() => navigate(tile.to)}
                 style={{ ...card, padding:'18px 8px', display:'flex', flexDirection:'column', alignItems:'center', gap:10, border:'none', cursor:'pointer', transition:'transform .14s ease, box-shadow .14s ease' }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 22px rgba(228,136,31,.18)'; const ic = e.currentTarget.firstChild; if (ic) { ic.style.transform = 'scale(1.08)'; ic.style.background = colors.accent; ic.style.color = colors.white; } }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,.08)'; const ic = e.currentTarget.firstChild; if (ic) { ic.style.transform = 'none'; ic.style.background = tile.bg; ic.style.color = colors.navy; } }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 22px rgba(228,136,31,.18)'; const ic = e.currentTarget.firstChild; if (ic) ic.style.transform = 'scale(1.08)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,.08)'; const ic = e.currentTarget.firstChild; if (ic) ic.style.transform = 'none'; }}
               >
-                <div style={{ width:56, height:56, borderRadius:16, background:tile.bg, display:'flex', alignItems:'center', justifyContent:'center', color:colors.navy, transition:'transform .14s ease, background .14s ease, color .14s ease' }}><Icon name={tile.icon} size={24} strokeWidth={1.8} /></div>
+                <div style={{ width:56, height:56, borderRadius:16, background:tile.bg, display:'flex', alignItems:'center', justifyContent:'center', transition:'transform .14s ease' }}><ColorIcon name={tile.icon} size={34} /></div>
                 <span style={{ fontSize:13, color:colors.textDark, fontWeight:600, textAlign:'center' }}>{tile.label}</span>
               </button>
             ))}
