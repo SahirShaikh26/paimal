@@ -214,7 +214,7 @@ router.post('/:id/email', async (req, res) => {
         + `${payLine}\n\nThank you.`,
       attachments: [{ filename: `${invoice.invoice_number}.pdf`, content: pdf, contentType: 'application/pdf' }],
     });
-    if (!result.sent) return res.status(502).json({ error: 'Email could not be sent' });
+    if (!result.sent) return res.status(502).json({ error: result.detail || 'Email could not be sent' });
 
     const upd = await db.query(
       `UPDATE invoices SET status=CASE WHEN status='Draft' THEN 'Sent' ELSE status END
