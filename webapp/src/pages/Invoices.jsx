@@ -29,6 +29,8 @@ export default function Invoices() {
   const qc = useQueryClient();
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState(EMPTY);
+  const [emailFor, setEmailFor] = useState(null);   // invoice being emailed
+  const [emailAddr, setEmailAddr] = useState('');
 
   const { data: invoices, isLoading } = useQuery({ queryKey: ['invoices'], queryFn: () => api.get('/invoices').then((r) => r.data) });
   const { data: customers } = useQuery({ queryKey: ['customers'], queryFn: () => api.get('/customers').then((r) => r.data) });
@@ -56,6 +58,31 @@ export default function Invoices() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['invoices'] }); toast.success('Marked paid'); },
     onError: (e) => toast.error(e.response?.data?.error || 'Could not update'),
   });
+  const sendEmail = useMutation({
+    mutationFn: ({ id, email }) => api.post(`/invoices/${id}/email`, { email }).then((r) => r.data),
+    onSuccess: (d) => { qc.invalidateQueries({ queryKey: ['invoices'] }); toast.success(`Invoice emailed to ${d.to}`); setEmailFor(null); },
+    onError: (e) => toast.error(e.response?.data?.error || 'Could not send email'),
+  });
+
+  // Fetch the PDF with auth (axios attaches the token) and open it in a new tab.
+  const openPdf = async (inv) => {
+    const t = toast.loading('Generating PDF…');
+    try {
+      const r = await api.get(`/invoices/${inv.id}/pdf`, { responseType: 'blob' });
+      const url = URL.createObjectURL(new Blob([r.data], { type: 'application/pdf' }));
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      toast.dismiss(t);
+    } catch {
+      toast.dismiss(t);
+      toast.error('Could not generate PDF');
+    }
+  };
+  const openEmail = (inv) => {
+    const cust = (customers || []).find((c) => c.id === inv.customer_id);
+    setEmailAddr(cust?.contact_email || '');
+    setEmailFor(inv);
+  };
 
   const openNew = () => { setForm(EMPTY); setModal(true); };
   const handleEdit = (inv) => {
@@ -104,6 +131,10 @@ export default function Invoices() {
               )}
             </div>
             <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+              <button style={s.link} onClick={() => openPdf(inv)}>PDF</button>
+              {inv.status !== 'Cancelled' && (
+                <button style={{ ...s.link, color: colors.blueDark }} onClick={() => openEmail(inv)}>Email</button>
+              )}
               {inv.status !== 'Paid' && inv.status !== 'Cancelled' && (
                 <>
                   <button style={s.link} onClick={() => handleEdit(inv)}>Edit</button>
@@ -153,6 +184,34 @@ export default function Invoices() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {emailFor && (
+        <div style={s.modal} onClick={(e) => { if (e.target === e.currentTarget) setEmailFor(null); }}>
+          <form
+            style={{ ...s.mcard, width: 'min(440px, 100%)' }}
+            onSubmit={(e) => { e.preventDefault(); sendEmail.mutate({ id: emailFor.id, email: emailAddr.trim() }); }}
+          >
+            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Email Invoice</h2>
+            <div style={{ fontSize: 13, color: colors.textMuted, marginBottom: 8 }}>
+              {emailFor.invoice_number} · {emailFor.customer_name || '—'} · {fmt(emailFor.total)}
+            </div>
+            <label style={s.label}>Send to</label>
+            <input
+              style={s.input} type="email" required autoFocus value={emailAddr}
+              onChange={(e) => setEmailAddr(e.target.value)} placeholder="customer@email.com"
+            />
+            <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 8 }}>
+              The invoice PDF is attached to the email.
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+              <button type="button" style={{ ...s.btn, background: colors.bgAlt, color: colors.text }} onClick={() => setEmailFor(null)}>Cancel</button>
+              <button type="submit" style={s.btn} disabled={sendEmail.isPending}>
+                {sendEmail.isPending ? 'Sending…' : 'Send Invoice'}
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>

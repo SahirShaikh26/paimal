@@ -20,7 +20,7 @@ const s = {
   row:   { display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 },
 };
 
-const EMPTY = { code:'', name:'', city:'', region:'', contact_name:'', contact_phone:'', address:'' };
+const EMPTY = { code:'', name:'', city:'', region:'', contact_name:'', contact_phone:'', contact_email:'', address:'' };
 
 export default function Customers() {
   const { user } = useAuth();
@@ -102,6 +102,8 @@ export default function Customers() {
                 <div><label style={s.label}>Contact Name</label><input style={s.minput} value={form.contact_name} onChange={set('contact_name')} /></div>
                 <div><label style={s.label}>Contact Phone</label><input style={s.minput} value={form.contact_phone} onChange={set('contact_phone')} /></div>
               </div>
+              <label style={s.label}>Contact Email</label>
+              <input style={s.minput} type="email" value={form.contact_email || ''} onChange={set('contact_email')} placeholder="billing@customer.com — used to email invoices" />
               <label style={s.label}>Address</label>
               <input style={s.minput} value={form.address} onChange={set('address')} placeholder="Full address" />
               <div style={{ display:'flex', gap:10, marginTop:8 }}>
