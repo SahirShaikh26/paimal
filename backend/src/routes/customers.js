@@ -56,14 +56,14 @@ router.post('/', async (req, res) => {
   if (!['Director', 'Manager'].includes(req.user.role)) {
     return res.status(403).json({ error: 'Insufficient permissions' });
   }
-  const { code, name, city, region, contact_name, contact_phone, address, lat, lng } = req.body;
+  const { code, name, city, region, contact_name, contact_phone, contact_email, address, lat, lng } = req.body;
   if (!code || !name) return res.status(400).json({ error: 'code and name required' });
 
   try {
     const { rows } = await db.query(
-      `INSERT INTO customers (tenant_id, code, name, city, region, contact_name, contact_phone, address, lat, lng)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-      [req.tenantId, code, name, city, region, contact_name, contact_phone, address, lat, lng]
+      `INSERT INTO customers (tenant_id, code, name, city, region, contact_name, contact_phone, contact_email, address, lat, lng)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+      [req.tenantId, code, name, city, region, contact_name, contact_phone, contact_email || null, address, lat, lng]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -77,14 +77,14 @@ router.put('/:id', async (req, res) => {
   if (!['Director', 'Manager'].includes(req.user.role)) {
     return res.status(403).json({ error: 'Insufficient permissions' });
   }
-  const { code, name, city, region, contact_name, contact_phone, address, lat, lng } = req.body;
+  const { code, name, city, region, contact_name, contact_phone, contact_email, address, lat, lng } = req.body;
 
   try {
     const { rows } = await db.query(
       `UPDATE customers SET code=$1, name=$2, city=$3, region=$4,
-         contact_name=$5, contact_phone=$6, address=$7, lat=$8, lng=$9
-       WHERE id=$10 AND tenant_id=$11 RETURNING *`,
-      [code, name, city, region, contact_name, contact_phone, address, lat, lng, req.params.id, req.tenantId]
+         contact_name=$5, contact_phone=$6, address=$7, lat=$8, lng=$9, contact_email=$10
+       WHERE id=$11 AND tenant_id=$12 RETURNING *`,
+      [code, name, city, region, contact_name, contact_phone, address, lat, lng, contact_email || null, req.params.id, req.tenantId]
     );
     if (!rows.length) return res.status(404).json({ error: 'Customer not found' });
     res.json(rows[0]);
