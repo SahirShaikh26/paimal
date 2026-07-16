@@ -203,15 +203,47 @@ router.post('/:id/email', async (req, res) => {
 
     const pdf = await generateInvoicePdf(data);
     const amount = 'Rs. ' + Number(invoice.total || 0).toLocaleString('en-IN');
-    const payLine = invoice.razorpay_payment_link_url
-      ? `\n\nPay online: ${invoice.razorpay_payment_link_url}` : '';
+    const esc = (s) => String(s == null ? '' : s).replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+    const company = esc(tenant.name || 'Paimal');
+    const greetName = customer.contact_name ? esc(customer.contact_name) : 'there';
+    const payUrl = invoice.razorpay_payment_link_url;
+    const fmtDate = (d) => { const dt = new Date(d); return isNaN(dt) ? '' : dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); };
+
+    // From: keep the verified address, but show the business as the sender name.
+    const baseFrom = process.env.MAIL_FROM || 'Paimal <invoices@paimal.com>';
+    const fromAddr = (baseFrom.match(/<([^>]+)>/) || [])[1] || 'invoices@paimal.com';
+    const from = `${(tenant.name || 'Paimal').replace(/["<>]/g, '')} <${fromAddr}>`;
+
+    const text = `Hi ${customer.contact_name || 'there'},\n\n`
+      + `Please find attached invoice ${invoice.invoice_number} for ${amount} from ${tenant.name}.\n`
+      + (invoice.due_date ? `Due by ${fmtDate(invoice.due_date)}.\n` : '')
+      + (payUrl ? `\nPay online: ${payUrl}\n` : '')
+      + `\nThank you.\n\n`
+      + `— — —\n`
+      + `This is a transactional email regarding invoice ${invoice.invoice_number}, sent by ${tenant.name} via Paimal. `
+      + `If you have questions about this invoice, reply to this email to reach ${tenant.name}. `
+      + `Paimal privacy policy: https://paimal.com/privacy`;
+
+    const html = `<div style="font-family:Arial,Helvetica,sans-serif;color:#201C16;font-size:15px;line-height:1.6;max-width:540px;margin:0 auto;padding:8px">
+  <p style="margin:0 0 14px">Hi ${greetName},</p>
+  <p style="margin:0 0 14px">Please find attached invoice <strong>${esc(invoice.invoice_number)}</strong> for <strong>${amount}</strong> from <strong>${company}</strong>.${invoice.due_date ? ` Due by <strong>${fmtDate(invoice.due_date)}</strong>.` : ''}</p>
+  ${payUrl ? `<p style="margin:0 0 18px"><a href="${esc(payUrl)}" style="display:inline-block;background:#E4881F;color:#ffffff;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:bold">Pay online</a></p>` : ''}
+  <p style="margin:0 0 6px;color:#8B8375;font-size:13px">📎 The invoice PDF is attached to this email.</p>
+  <hr style="border:none;border-top:1px solid #EAE4DA;margin:22px 0 12px">
+  <p style="margin:0;color:#8B8375;font-size:12px;line-height:1.6">
+    This is a transactional email regarding invoice ${esc(invoice.invoice_number)}, sent by <strong>${company}</strong> via Paimal.
+    If you have questions about this invoice, just reply to this email to reach ${company}.<br>
+    ${company} uses Paimal to manage its field operations and billing — see Paimal's <a href="https://paimal.com/privacy" style="color:#C2740C">Privacy Policy</a>.
+  </p>
+</div>`;
 
     const result = await sendMail({
       to: email,
+      from,
+      replyTo: req.user.email || undefined,
       subject: `Invoice ${invoice.invoice_number} from ${tenant.name}`,
-      text: `Hi${customer.contact_name ? ' ' + customer.contact_name : ''},\n\n`
-        + `Please find attached invoice ${invoice.invoice_number} for ${amount} from ${tenant.name}.`
-        + `${payLine}\n\nThank you.`,
+      text,
+      html,
       attachments: [{ filename: `${invoice.invoice_number}.pdf`, content: pdf, contentType: 'application/pdf' }],
     });
     if (!result.sent) return res.status(502).json({ error: result.detail || 'Email could not be sent' });

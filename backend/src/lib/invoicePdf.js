@@ -1,17 +1,27 @@
 const PDFDocument = require('pdfkit');
 
-// Paimal invoice PDF. Programmatic (pdfkit) — no headless browser, no network.
-// Returns a Promise<Buffer> so the same output can be streamed for download or
-// attached to an email.
+// Paimal invoice PDF — bold, professional layout. Programmatic (pdfkit): no
+// headless browser, no network. Returns a Promise<Buffer> so the same output
+// streams for download or attaches to an email.
 //
-// Note: the standard PDF Helvetica font has no ₹ glyph, so amounts are printed
-// as "Rs." to stay legible on every viewer.
+// Note: the built-in Helvetica font has no ₹ glyph, so amounts print as "Rs."
+// to stay legible on every viewer.
 const INK = '#201C16';
+const INK2 = '#4A443B';
 const MARIGOLD = '#E4881F';
 const MARIGOLD_D = '#C2740C';
 const MUTED = '#8B8375';
+const FAINT = '#B8AE9E';
 const LINE = '#E5DFD4';
-const PAPER = '#FBFAF7';
+const ZEBRA = '#FBF6EE';
+
+const STATUS = {
+  Draft: { bg: '#F1ECE3', fg: '#8B8375' },
+  Sent: { bg: '#FBEFD9', fg: '#C2740C' },
+  Paid: { bg: '#DCF0E6', fg: '#3F8F5B' },
+  Overdue: { bg: '#F7E1DC', fg: '#C0492F' },
+  Cancelled: { bg: '#F1ECE3', fg: '#8B8375' },
+};
 
 const money = (n) =>
   'Rs. ' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -25,7 +35,7 @@ function fmtDate(d) {
 
 function generateInvoicePdf({ invoice, customer = {}, tenant = {} }) {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: 'A4', margin: 50 });
+    const doc = new PDFDocument({ size: 'A4', margin: 40 });
     const chunks = [];
     doc.on('data', (c) => chunks.push(c));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
@@ -35,28 +45,28 @@ function generateInvoicePdf({ invoice, customer = {}, tenant = {} }) {
       ? (() => { try { return JSON.parse(invoice.line_items); } catch { return []; } })()
       : (invoice.line_items || []);
 
-    const L = doc.page.margins.left;             // 50
-    const R = doc.page.width - doc.page.margins.right; // 545
+    const PW = doc.page.width;
+    const L = 40;
+    const R = PW - 40;
     const W = R - L;
 
-    // ---- Header ----
-    doc.fillColor(INK).font('Helvetica-Bold').fontSize(20).text(tenant.name || 'Paimal', L, 52);
-    doc.font('Helvetica').fontSize(9).fillColor(MUTED).text('Field service management', L, 76);
+    // ===== Header band (full-bleed ink + marigold rule) =====
+    doc.rect(0, 0, PW, 104).fill(INK);
+    doc.rect(0, 104, PW, 4).fill(MARIGOLD);
+    doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(24)
+      .text(tenant.name || 'Paimal', L, 33, { width: W * 0.62, lineBreak: false });
+    doc.fillColor(FAINT).font('Helvetica').fontSize(9.5)
+      .text('TAX INVOICE', L, 70, { characterSpacing: 2 });
+    doc.fillColor(MARIGOLD).font('Helvetica-Bold').fontSize(27)
+      .text('INVOICE', L, 31, { width: W, align: 'right' });
+    doc.fillColor('#E8E2D8').font('Helvetica').fontSize(12)
+      .text(invoice.invoice_number || '', L, 68, { width: W, align: 'right' });
 
-    doc.font('Helvetica-Bold').fontSize(26).fillColor(MARIGOLD)
-      .text('INVOICE', L, 50, { width: W, align: 'right' });
-    doc.font('Helvetica').fontSize(11).fillColor(INK)
-      .text(invoice.invoice_number || '', L, 82, { width: W, align: 'right' });
-
-    // rule
-    doc.moveTo(L, 104).lineTo(R, 104).strokeColor(MARIGOLD).lineWidth(2).stroke();
-
-    // ---- Bill-to + details ----
-    const topY = 124;
-    const colW = W / 2 - 10;
-    doc.font('Helvetica-Bold').fontSize(9).fillColor(MUTED).text('BILLED TO', L, topY);
-    doc.font('Helvetica-Bold').fontSize(12).fillColor(INK).text(customer.name || '—', L, topY + 14, { width: colW });
-    const nameH = doc.heightOfString(customer.name || '—', { width: colW });
+    // ===== Bill-to (left) + meta (right) =====
+    const y0 = 134;
+    doc.fillColor(MARIGOLD_D).font('Helvetica-Bold').fontSize(9).text('BILLED TO', L, y0, { characterSpacing: 1 });
+    doc.fillColor(INK).font('Helvetica-Bold').fontSize(13).text(customer.name || '—', L, y0 + 15, { width: W * 0.55 });
+    const nameH = doc.heightOfString(customer.name || '—', { width: W * 0.55 });
     const billLines = [
       customer.contact_name,
       customer.address,
@@ -64,94 +74,101 @@ function generateInvoicePdf({ invoice, customer = {}, tenant = {} }) {
       customer.contact_phone,
       customer.contact_email,
     ].filter(Boolean);
-    doc.font('Helvetica').fontSize(10).fillColor(INK)
-      .text(billLines.join('\n'), L, topY + 18 + nameH, { width: colW, lineGap: 2 });
+    doc.fillColor(INK2).font('Helvetica').fontSize(10)
+      .text(billLines.join('\n'), L, y0 + 19 + nameH, { width: W * 0.55, lineGap: 3 });
     const billBottom = doc.y;
 
-    // right column details
-    const rightX = L + W / 2 + 10;
-    const detail = (label, value, dy) => {
-      doc.font('Helvetica').fontSize(9).fillColor(MUTED).text(label, rightX, dy, { width: colW, align: 'left' });
-      doc.font('Helvetica-Bold').fontSize(10).fillColor(INK).text(value, rightX, dy, { width: colW, align: 'right' });
+    // meta right column
+    const mx = L + W * 0.58;
+    const mw = W * 0.42;
+    const metaRow = (label, value, dy) => {
+      doc.font('Helvetica').fontSize(9).fillColor(MUTED).text(label, mx, dy + 1, { width: mw, align: 'left' });
+      doc.font('Helvetica-Bold').fontSize(10.5).fillColor(INK).text(value, mx, dy, { width: mw, align: 'right' });
     };
-    detail('Invoice date', fmtDate(invoice.created_at), topY);
-    detail('Due date', fmtDate(invoice.due_date), topY + 18);
-    detail('Status', String(invoice.status || 'Draft'), topY + 36);
+    metaRow('Invoice date', fmtDate(invoice.created_at), y0);
+    metaRow('Due date', fmtDate(invoice.due_date), y0 + 20);
+    // status badge
+    const st = STATUS[invoice.status] || STATUS.Draft;
+    const label = String(invoice.status || 'Draft').toUpperCase();
+    doc.font('Helvetica').fontSize(9).fillColor(MUTED).text('Status', mx, y0 + 44, { width: mw, align: 'left' });
+    doc.font('Helvetica-Bold').fontSize(9);
+    const bw = doc.widthOfString(label) + 24;
+    const bx = R - bw;
+    doc.roundedRect(bx, y0 + 40, bw, 20, 10).fill(st.bg);
+    doc.fillColor(st.fg).font('Helvetica-Bold').fontSize(9).text(label, bx, y0 + 46, { width: bw, align: 'center', characterSpacing: 0.5 });
 
-    // ---- Line items table (starts below the taller of the two columns) ----
-    let y = Math.max(billBottom, topY + 54) + 26;
-    const cols = { desc: L, qty: 330, rate: 400, amt: R };
-    doc.font('Helvetica-Bold').fontSize(9).fillColor(MARIGOLD_D);
-    doc.text('DESCRIPTION', cols.desc, y);
-    doc.text('QTY', cols.qty - 40, y, { width: 40, align: 'right' });
-    doc.text('RATE', cols.rate - 60, y, { width: 60, align: 'right' });
-    doc.text('AMOUNT', cols.amt - 90, y, { width: 90, align: 'right' });
-    y += 15;
-    doc.moveTo(L, y).lineTo(R, y).strokeColor(LINE).lineWidth(1).stroke();
-    y += 8;
+    // ===== Line items table =====
+    let y = Math.max(billBottom, y0 + 68) + 24;
+    const cDesc = L + 14;
+    const qtyR = L + 322;
+    const rateR = L + 428;
+    const amtR = R - 14;
 
-    doc.font('Helvetica').fontSize(10).fillColor(INK);
-    if (!items.length) {
-      doc.fillColor(MUTED).text('No line items', L, y);
-      y += 18;
-    }
-    items.forEach((it) => {
+    doc.rect(L, y, W, 26).fill(INK);
+    doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(9.5);
+    doc.text('DESCRIPTION', cDesc, y + 8.5, { characterSpacing: 0.5 });
+    doc.text('QTY', qtyR - 50, y + 8.5, { width: 50, align: 'right' });
+    doc.text('RATE', rateR - 74, y + 8.5, { width: 74, align: 'right' });
+    doc.text('AMOUNT', amtR - 96, y + 8.5, { width: 96, align: 'right' });
+    y += 26;
+
+    items.forEach((it, i) => {
       const qty = Number(it.qty) || 0;
       const rate = Number(it.rate) || 0;
-      const amount = qty * rate;
-      const descH = doc.heightOfString(it.description || '—', { width: 260 });
-      doc.fillColor(INK).font('Helvetica').fontSize(10);
-      doc.text(it.description || '—', cols.desc, y, { width: 260 });
-      doc.text(String(qty), cols.qty - 40, y, { width: 40, align: 'right' });
-      doc.text(money(rate), cols.rate - 60, y, { width: 60, align: 'right' });
-      doc.text(money(amount), cols.amt - 90, y, { width: 90, align: 'right' });
-      y += Math.max(descH, 12) + 8;
-      if (y > 720) { doc.addPage(); y = 60; }
+      const amt = qty * rate;
+      const descH = doc.heightOfString(it.description || '—', { width: 250 });
+      const rowH = Math.max(descH, 14) + 13;
+      if (i % 2 === 1) doc.rect(L, y, W, rowH).fill(ZEBRA);
+      doc.fillColor(INK).font('Helvetica').fontSize(10).text(it.description || '—', cDesc, y + 8, { width: 250 });
+      doc.fillColor(INK2).text(String(qty), qtyR - 50, y + 8, { width: 50, align: 'right' });
+      doc.text(money(rate), rateR - 74, y + 8, { width: 74, align: 'right' });
+      doc.fillColor(INK).font('Helvetica-Bold').text(money(amt), amtR - 96, y + 8, { width: 96, align: 'right' });
+      y += rowH;
+      if (y > 690) { doc.addPage(); y = 50; }
     });
+    doc.rect(L, y, W, 1).fill(LINE);
+    y += 18;
 
-    doc.moveTo(L, y).lineTo(R, y).strokeColor(LINE).lineWidth(1).stroke();
-    y += 12;
-
-    // ---- Totals ----
-    const totRow = (label, value, opts = {}) => {
-      const lx = R - 240, lw = 130, vx = R - 110, vw = 110;
-      doc.font(opts.bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(opts.big ? 13 : 10)
-        .fillColor(opts.accent ? MARIGOLD_D : (opts.bold ? INK : MUTED));
-      doc.text(label, lx, y, { width: lw, align: 'left' });
-      doc.fillColor(opts.accent ? MARIGOLD_D : INK)
-        .text(value, vx, y, { width: vw, align: 'right' });
-      y += opts.big ? 22 : 18;
+    // ===== Totals =====
+    const tLabelX = R - 250;
+    const tValX = R - 140;
+    const totRow = (lab, val) => {
+      doc.font('Helvetica').fontSize(10).fillColor(MUTED).text(lab, tLabelX, y, { width: 110, align: 'left' });
+      doc.font('Helvetica-Bold').fillColor(INK).text(val, tValX, y, { width: 140, align: 'right' });
+      y += 19;
     };
     totRow('Subtotal', money(invoice.subtotal));
     totRow(`Tax (${Number(invoice.tax_pct) || 0}%)`, money(invoice.tax_amount));
-    doc.moveTo(R - 240, y).lineTo(R, y).strokeColor(LINE).lineWidth(1).stroke();
-    y += 8;
-    totRow('Total', money(invoice.total), { bold: true, big: true, accent: true });
+    if (Number(invoice.amount_paid) > 0) totRow('Amount paid', money(invoice.amount_paid));
+    y += 6;
 
-    if (Number(invoice.amount_paid) > 0) {
-      totRow('Paid', money(invoice.amount_paid), { bold: true });
-    }
+    const boxX = R - 250;
+    const boxW = 250;
+    doc.roundedRect(boxX, y, boxW, 42, 8).fill(INK);
+    doc.fillColor(MARIGOLD).font('Helvetica-Bold').fontSize(11).text('TOTAL', boxX + 18, y + 15, { lineBreak: false });
+    doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(16).text(money(invoice.total), boxX, y + 12, { width: boxW - 18, align: 'right' });
+    y += 42 + 22;
 
-    // ---- Notes / payment link ----
-    y += 16;
+    // ===== Notes / payment link =====
     if (invoice.notes) {
-      doc.font('Helvetica-Bold').fontSize(9).fillColor(MUTED).text('NOTES', L, y);
+      doc.fillColor(MARIGOLD_D).font('Helvetica-Bold').fontSize(9).text('NOTES', L, y, { characterSpacing: 1 });
       y += 13;
-      doc.font('Helvetica').fontSize(10).fillColor(INK).text(invoice.notes, L, y, { width: W });
+      doc.fillColor(INK2).font('Helvetica').fontSize(10).text(invoice.notes, L, y, { width: W });
       y = doc.y + 12;
     }
     if (invoice.razorpay_payment_link_url) {
       doc.font('Helvetica-Bold').fontSize(10).fillColor(INK).text('Pay online: ', L, y, { continued: true })
-        .font('Helvetica').fillColor(MARIGOLD_D).text(invoice.razorpay_payment_link_url, { link: invoice.razorpay_payment_link_url, underline: true });
-      y = doc.y + 6;
+        .font('Helvetica').fillColor(MARIGOLD_D)
+        .text(invoice.razorpay_payment_link_url, { link: invoice.razorpay_payment_link_url, underline: true });
     }
 
-    // ---- Footer (fixed near the page bottom, single line so it never paginates) ----
-    const footY = doc.page.height - 92;
-    doc.moveTo(L, footY).lineTo(R, footY).strokeColor(LINE).lineWidth(1).stroke();
+    // ===== Footer (kept above the bottom margin so it never spills to a new page) =====
+    const fy = doc.page.height - 80;
+    doc.rect(L, fy, W, 3).fill(MARIGOLD);
     doc.font('Helvetica').fontSize(9).fillColor(MUTED)
-      .text('Thank you for your business.', L, footY + 12, { width: W, align: 'left', lineBreak: false });
-    doc.text('Generated by Paimal', L, footY + 12, { width: W, align: 'right', lineBreak: false });
+      .text('Thank you for your business.', L, fy + 12, { width: W * 0.6, align: 'left', lineBreak: false });
+    doc.fillColor('#B0A794')
+      .text('Powered by Paimal', L, fy + 12, { width: W, align: 'right', lineBreak: false });
 
     doc.end();
   });

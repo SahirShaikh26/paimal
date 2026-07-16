@@ -34,17 +34,20 @@ const transporter = (!useResendApi && configured)
 
 /**
  * Send an email. Returns { sent, skipped?, error? } and never throws.
- * @param {{ to: string, subject: string, text?: string, html?: string, attachments?: Array<{filename:string, content:Buffer|string, contentType?:string}> }} opts
+ * `from` overrides MAIL_FROM's display name per send (address stays the verified one);
+ * `replyTo` routes customer replies to the sender.
+ * @param {{ to: string, subject: string, text?: string, html?: string, from?: string, replyTo?: string, attachments?: Array<{filename:string, content:Buffer|string, contentType?:string}> }} opts
  */
-async function sendMail({ to, subject, text, html, attachments }) {
+async function sendMail({ to, subject, text, html, from, replyTo, attachments }) {
   if (!configured) return { sent: false, skipped: true, reason: 'not_configured' };
 
   if (useResendApi) {
     try {
       const body = {
-        from: FROM,
+        from: from || FROM,
         to: Array.isArray(to) ? to : [to],
         subject, text, html,
+        reply_to: replyTo || undefined,
         attachments: (attachments || []).map((a) => ({
           filename: a.filename,
           content: Buffer.isBuffer(a.content) ? a.content.toString('base64') : a.content,
@@ -70,7 +73,7 @@ async function sendMail({ to, subject, text, html, attachments }) {
   }
 
   try {
-    await transporter.sendMail({ from: FROM, to, subject, text, html, attachments });
+    await transporter.sendMail({ from: from || FROM, to, subject, text, html, replyTo, attachments });
     return { sent: true };
   } catch (err) {
     console.error('Email send error:', err.message);
