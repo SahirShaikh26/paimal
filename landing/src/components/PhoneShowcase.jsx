@@ -1,4 +1,4 @@
-import { SIGNUP_URL } from '../config';
+import { ANDROID_DOWNLOAD_URL, ANDROID_ON_PLAY_STORE, SIGNUP_URL } from '../config';
 import Icon from './Icon';
 import ColorIcon from './ColorIcon';
 import Reveal from './Reveal';
@@ -64,7 +64,21 @@ export default function PhoneShowcase() {
               </div>
             ))}
           </div>
-          <a href={SIGNUP_URL} className="btn btn-glow btn-lg">Start Free Trial <Icon name="arrow" /></a>
+          <div className="showcase-cta">
+            <a href={SIGNUP_URL} className="btn btn-glow btn-lg">Start Free Trial <Icon name="arrow" /></a>
+            <a
+              href={ANDROID_DOWNLOAD_URL}
+              className="btn btn-ghost btn-lg"
+              {...(ANDROID_ON_PLAY_STORE ? { target: '_blank', rel: 'noopener' } : { download: true })}
+            >
+              <Icon name="android" /> Download for Android
+            </a>
+          </div>
+          <p className="showcase-note">
+            {ANDROID_ON_PLAY_STORE
+              ? 'Free on Google Play. Sign in with your Paimal account.'
+              : 'Android APK · sign in with your Paimal account. Your phone will ask you to allow installs from your browser — that’s expected for apps downloaded outside the Play Store.'}
+          </p>
         </Reveal>
       </div>
     </section>

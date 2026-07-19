@@ -240,6 +240,8 @@ button { font-family: inherit; }
 .showcase-point .sp-ic { flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; background: #F7F1E6; border: 1px solid #EFE7D8; display: flex; align-items: center; justify-content: center; }
 .showcase-point h4 { font-size: 15.5px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
 .showcase-point p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+.showcase-cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.showcase-note { margin-top: 12px; max-width: 460px; font-size: 12.5px; line-height: 1.6; color: var(--text-muted); }
 .hero-grid {
   display: grid;
   grid-template-columns: 1.08fr 1fr;
