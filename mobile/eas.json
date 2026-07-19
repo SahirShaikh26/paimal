@@ -11,12 +11,20 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME": "dtu2a5fv0",
+        "EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "vl0lafxx"
       }
     },
     "production": {
       "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME": "dtu2a5fv0",
+        "EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "vl0lafxx"
       }
     }
   },
