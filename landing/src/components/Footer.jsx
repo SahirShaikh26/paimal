@@ -1,8 +1,14 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LOGIN_URL, SIGNUP_URL } from '../config';
+import { CONTACT_EMAIL, LOGIN_URL, SIGNUP_URL } from '../config';
 import PaimalLogo from './PaimalLogo';
 
 export default function Footer() {
+  // Starts at the build year (so the prerendered markup matches), then corrects
+  // itself on the client — otherwise the year would freeze until the next deploy.
+  const [year, setYear] = useState(__BUILD_YEAR__);
+  useEffect(() => setYear(new Date().getFullYear()), []);
+
   return (
     <footer className="footer">
       <div className="container">
@@ -15,10 +21,10 @@ export default function Footer() {
             <a href={LOGIN_URL}>Log In</a>
             <a href={SIGNUP_URL}>Start Free Trial</a>
             <a href="/privacy.html">Privacy Policy</a>
-            <a href="mailto:hello@paimal.app">Contact</a>
+            <a href={`mailto:${CONTACT_EMAIL}`}>Contact</a>
           </div>
         </div>
-        <div className="footer-bottom">© {new Date().getFullYear()} Paimal. All rights reserved.</div>
+        <div className="footer-bottom">© {year} Paimal. All rights reserved.</div>
       </div>
     </footer>
   );

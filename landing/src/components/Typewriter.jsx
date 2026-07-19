@@ -1,29 +1,38 @@
 import { useEffect, useState } from 'react';
 import useInView from '../hooks/useInView';
+import useLayout from '../hooks/useIsomorphicLayoutEffect';
+import { prefersReducedMotion } from '../lib/motion';
 
 // Types `text` out character-by-character once scrolled into view.
-// Under reduced motion it renders the full string immediately (no caret).
+// Renders the full string up front so it lands in the prerendered HTML for
+// crawlers and no-JS visitors; the client empties it before the first paint and
+// types it back in. Under reduced motion it simply stays whole, with no caret.
 export default function Typewriter({ text, speed = 22, className }) {
   const [ref, inView] = useInView();
-  const [shown, setShown] = useState('');
-  const reduce = typeof window !== 'undefined' && window.matchMedia
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const [shown, setShown] = useState(text);
+  const [typing, setTyping] = useState(false);
+
+  useLayout(() => {
+    if (!prefersReducedMotion()) setShown('');
+  }, [text]);
 
   useEffect(() => {
-    if (!inView) return;
-    if (reduce) { setShown(text); return; }
+    if (!inView || prefersReducedMotion()) return;
     let i = 0;
+    setTyping(true);
     const id = setInterval(() => {
       i += 1;
       setShown(text.slice(0, i));
-      if (i >= text.length) clearInterval(id);
+      if (i >= text.length) {
+        clearInterval(id);
+        setTyping(false);
+      }
     }, speed);
-    return () => clearInterval(id);
-  }, [inView, text, speed, reduce]);
+    return () => { clearInterval(id); setTyping(false); };
+  }, [inView, text, speed]);
 
-  const done = shown.length >= text.length;
   return (
-    <span ref={ref} className={`${className || ''}${!reduce && !done ? ' caret' : ''}`}>
+    <span ref={ref} className={`${className || ''}${typing ? ' caret' : ''}`}>
       {shown}
     </span>
   );
