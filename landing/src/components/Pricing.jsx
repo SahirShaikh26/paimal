@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { SIGNUP_URL } from '../config';
+import { CONTACT_EMAIL, SIGNUP_URL } from '../config';
 import Reveal from './Reveal';
 
 const TIERS = [
@@ -35,7 +35,7 @@ const TIERS = [
     seats: 'Unlimited seats',
     features: ['Everything in Pro', 'Unlimited seats', 'Dedicated onboarding', 'Custom contract terms'],
     cta: 'Contact Sales',
-    href: 'mailto:sales@fieldpilot.app?subject=Enterprise%20Plan',
+    href: `mailto:${CONTACT_EMAIL}?subject=Enterprise%20Plan`,
   },
 ];
 
