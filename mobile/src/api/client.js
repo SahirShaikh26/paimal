@@ -1,9 +1,9 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-// Change this to your deployed Railway URL for production
-// During dev on the same WiFi, use your laptop's local IP: http://192.168.x.x:4000/api
-const BASE_URL = 'https://fieldpilot-api-production-1652.up.railway.app/api';
+// Production API (Vercel functions, bom1). During dev on the same WiFi, point
+// this at your laptop's local IP instead: http://192.168.x.x:4000/api
+const BASE_URL = 'https://paimal-api.vercel.app/api';
 
 const api = axios.create({ baseURL: BASE_URL, timeout: 15000 });
 
