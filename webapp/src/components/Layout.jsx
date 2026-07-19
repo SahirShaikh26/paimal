@@ -10,24 +10,31 @@ const OWNER_EMAILS = (import.meta.env.VITE_OWNER_EMAILS || '').split(',').map((e
 
 const NAV = [
   { to: '/',          label: 'Dashboard',    icon: 'grid' },
-  { to: '/logs',      label: 'Activity Logs', icon: 'list' },
-  { to: '/logs/new',  label: 'Log Activity', icon: 'edit' },
-  { to: '/projects',  label: 'Projects',     icon: 'folder' },
-  { to: '/assignments', label: 'Assignments', icon: 'layers', roles: ['Director', 'Manager'] },
-  { to: '/schedule',  label: 'Schedule',     icon: 'calendar' },
-  { to: '/tickets',   label: 'Support Tickets', icon: 'ticket' },
-  { to: '/quotes',    label: 'Quotes',       icon: 'file', roles: ['Director', 'Manager'] },
-  { to: '/invoices',  label: 'Invoices',     icon: 'receipt', roles: ['Director', 'Manager'] },
-  { to: '/customers', label: 'Customers',    icon: 'building' },
-  { to: '/engineers', label: 'Team',         icon: 'users' },
-  { to: '/analytics', label: 'Analytics',   icon: 'chart' },
-  { to: '/variance',  label: 'Planned vs Actual', icon: 'target', roles: ['Director', 'Manager'] },
-  { to: '/reports',   label: 'Reports',     icon: 'clipboard' },
-  { to: '/import',    label: 'Import Data', icon: 'download' },
-  { to: '/digest',    label: 'Daily Digest', icon: 'sparkle', roles: ['Director', 'Manager'] },
-  { to: '/billing',   label: 'Billing',     icon: 'card', roles: ['Director'] },
-  { to: '/settings',  label: 'Settings',    icon: 'gear', roles: ['Director'] },
-  { to: '/status',    label: 'Status',      icon: 'pulse', ownerOnly: true },
+  { to: '/logs',      label: 'Activity Logs', icon: 'list', section: 'Work' },
+  { to: '/logs/new',  label: 'Log Activity', icon: 'edit', section: 'Work' },
+  { to: '/projects',  label: 'Projects',     icon: 'folder', section: 'Work' },
+  { to: '/tasks',     label: 'Tasks',        icon: 'columns', section: 'Work' },
+  { to: '/assignments', label: 'Assignments', icon: 'layers', roles: ['Director', 'Manager'], section: 'Work' },
+  { to: '/schedule',  label: 'Schedule',     icon: 'calendar', section: 'Work' },
+  { to: '/tickets',   label: 'Support Tickets', icon: 'ticket', section: 'Work' },
+  { to: '/quotes',    label: 'Quotes',       icon: 'file', roles: ['Director', 'Manager'], section: 'Sales' },
+  { to: '/invoices',  label: 'Invoices',     icon: 'receipt', roles: ['Director', 'Manager'], section: 'Sales' },
+  { to: '/customers', label: 'Customers',    icon: 'building', section: 'Sales' },
+  { to: '/attendance', label: 'Attendance',  icon: 'clock', section: 'HR' },
+  { to: '/leave',     label: 'Leave',        icon: 'sun', section: 'HR' },
+  { to: '/shifts',    label: 'Shifts',       icon: 'calendar', section: 'HR' },
+  { to: '/timesheets', label: 'Timesheets',  icon: 'clipboard', section: 'HR' },
+  { to: '/payroll',   label: 'Payroll',      icon: 'banknote', roles: ['Director'], section: 'HR' },
+  { to: '/payslips',  label: 'My Payslips',  icon: 'receipt', section: 'HR' },
+  { to: '/engineers', label: 'Team',         icon: 'users', section: 'HR' },
+  { to: '/analytics', label: 'Analytics',   icon: 'chart', section: 'Insights' },
+  { to: '/variance',  label: 'Planned vs Actual', icon: 'target', roles: ['Director', 'Manager'], section: 'Insights' },
+  { to: '/reports',   label: 'Reports',     icon: 'clipboard', section: 'Insights' },
+  { to: '/digest',    label: 'Daily Digest', icon: 'sparkle', roles: ['Director', 'Manager'], section: 'Insights' },
+  { to: '/import',    label: 'Import Data', icon: 'download', section: 'Admin' },
+  { to: '/billing',   label: 'Billing',     icon: 'card', roles: ['Director'], section: 'Admin' },
+  { to: '/settings',  label: 'Settings',    icon: 'gear', roles: ['Director'], section: 'Admin' },
+  { to: '/status',    label: 'Status',      icon: 'pulse', ownerOnly: true, section: 'Admin' },
 ];
 
 const navLink   = { display:'flex', alignItems:'center', gap:11, padding:'10px 20px', color:'rgba(255,255,255,.72)', textDecoration:'none', fontSize:14 };
@@ -85,21 +92,35 @@ export default function Layout() {
           )}
         </div>
         <nav style={{ flex:1, padding:'12px 0', overflowY:'auto' }}>
-          {NAV.filter(({ roles, ownerOnly }) => {
-            if (roles && !roles.includes(user?.role)) return false;
-            if (ownerOnly && !OWNER_EMAILS.includes((user?.email || '').toLowerCase())) return false;
-            return true;
-          }).map(({ to, label, icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
-              onClick={isMobile ? closeSidebar : undefined}
-              style={({ isActive }) => ({ ...navLink, ...(isActive ? navActive : {}) })}
-            >
-              <Icon name={icon} size={18} />{label}
-            </NavLink>
-          ))}
+          {(() => {
+            const visible = NAV.filter(({ roles, ownerOnly }) => {
+              if (roles && !roles.includes(user?.role)) return false;
+              if (ownerOnly && !OWNER_EMAILS.includes((user?.email || '').toLowerCase())) return false;
+              return true;
+            });
+            let lastSection = null;
+            return visible.map(({ to, label, icon, section }) => {
+              const divider = section && section !== lastSection ? (
+                <div key={`sec-${section}`} style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.09em', textTransform: 'uppercase', color: 'rgba(255,255,255,.38)', padding: '14px 20px 4px' }}>
+                  {section}
+                </div>
+              ) : null;
+              lastSection = section || lastSection;
+              return (
+                <div key={to}>
+                  {divider}
+                  <NavLink
+                    to={to}
+                    end={to === '/'}
+                    onClick={isMobile ? closeSidebar : undefined}
+                    style={({ isActive }) => ({ ...navLink, ...(isActive ? navActive : {}) })}
+                  >
+                    <Icon name={icon} size={18} />{label}
+                  </NavLink>
+                </div>
+              );
+            });
+          })()}
         </nav>
         <div style={{ padding:'12px 20px', borderTop:'1px solid rgba(255,255,255,.15)', fontSize:13, color:'rgba(255,255,255,.7)' }}>
           <div style={{ fontWeight:600, color:colors.white }}>{user?.name}</div>

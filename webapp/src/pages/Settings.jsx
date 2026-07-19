@@ -173,6 +173,64 @@ export default function Settings() {
       )}
 
       <div style={s.card}>
+        <div style={s.label}>Attendance & Payroll</div>
+        <div style={s.desc}>
+          Pay-period grouping for timesheets, overtime thresholds (0 = no overtime rule),
+          the late-arrival grace window, and your working week.
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 14 }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: colors.text, marginBottom: 5 }}>Pay period</div>
+            <select
+              style={{ ...s.input, width: '100%' }}
+              value={data?.pay_period || 'monthly'}
+              onChange={(e) => update.mutate({ pay_period: e.target.value })}
+            >
+              <option value="weekly">Weekly (Mon–Sun)</option>
+              <option value="biweekly">Bi-weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: colors.text, marginBottom: 5 }}>Working days / week</div>
+            <select
+              style={{ ...s.input, width: '100%' }}
+              value={data?.working_days_per_week || 6}
+              onChange={(e) => update.mutate({ working_days_per_week: Number(e.target.value) })}
+            >
+              <option value={5}>5 (Mon–Fri)</option>
+              <option value={6}>6 (Mon–Sat)</option>
+              <option value={7}>7 (all days)</option>
+            </select>
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: colors.text, marginBottom: 5 }}>Daily OT after (hours)</div>
+            <input
+              type="number" min="0" step="0.5" style={{ ...s.input, width: '100%' }}
+              defaultValue={data?.ot_daily_hours ?? 0}
+              onBlur={(e) => { if (Number(e.target.value) !== Number(data?.ot_daily_hours)) update.mutate({ ot_daily_hours: Number(e.target.value) }); }}
+            />
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: colors.text, marginBottom: 5 }}>Weekly OT after (hours)</div>
+            <input
+              type="number" min="0" step="0.5" style={{ ...s.input, width: '100%' }}
+              defaultValue={data?.ot_weekly_hours ?? 0}
+              onBlur={(e) => { if (Number(e.target.value) !== Number(data?.ot_weekly_hours)) update.mutate({ ot_weekly_hours: Number(e.target.value) }); }}
+            />
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: colors.text, marginBottom: 5 }}>Late grace (minutes)</div>
+            <input
+              type="number" min="0" step="5" style={{ ...s.input, width: '100%' }}
+              defaultValue={data?.late_grace_minutes ?? 10}
+              onBlur={(e) => { if (Number(e.target.value) !== Number(data?.late_grace_minutes)) update.mutate({ late_grace_minutes: Number(e.target.value) }); }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div style={s.card}>
         <div style={s.label}>Activity Types</div>
         <div style={s.desc}>
           The job types your team logs against — customize these to match your trade

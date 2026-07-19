@@ -28,6 +28,12 @@ const bookingRequestsRoutes = require('./routes/bookingRequests');
 const productsRoutes = require('./routes/products');
 const assignmentsRoutes = require('./routes/assignments');
 const supportTicketsRoutes = require('./routes/supportTickets');
+const attendanceRoutes = require('./routes/attendance');
+const leaveRoutes = require('./routes/leave');
+const shiftsRoutes = require('./routes/shifts');
+const timesheetsRoutes = require('./routes/timesheets');
+const tasksRoutes = require('./routes/tasks');
+const payrollRoutes = require('./routes/payroll');
 
 async function migrate() {
   const stmts = [
@@ -115,6 +121,52 @@ async function migrate() {
     `CREATE INDEX IF NOT EXISTS idx_visits_engineer ON visits(engineer_id)`,
     `CREATE INDEX IF NOT EXISTS idx_activity_types_tenant ON activity_types(tenant_id)`,
     `CREATE INDEX IF NOT EXISTS idx_recurring_templates_tenant ON recurring_visit_templates(tenant_id)`,
+    // --- HR & workforce: attendance tenancy fix, leave, shifts, timesheets, tasks, payroll ---
+    // attendance predates multi-tenancy; add tenant_id and backfill from the user row.
+    `ALTER TABLE attendance ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE`,
+    `UPDATE attendance SET tenant_id = (SELECT tenant_id FROM users u WHERE u.id = attendance.engineer_id) WHERE tenant_id IS NULL`,
+    `CREATE INDEX IF NOT EXISTS idx_attendance_tenant_date ON attendance(tenant_id, date DESC)`,
+    // Tenant HR settings (column-per-setting, same convention as photo_capture_enabled).
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS pay_period VARCHAR(10) DEFAULT 'monthly'`,
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS ot_daily_hours DECIMAL(4,1) DEFAULT 0`,
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS ot_weekly_hours DECIMAL(5,1) DEFAULT 0`,
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS late_grace_minutes INTEGER DEFAULT 10`,
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS working_days_per_week INTEGER DEFAULT 6`,
+    // Leave management. Balances are derived (quota + adjustments − approved days), never stored.
+    `CREATE TABLE IF NOT EXISTS leave_types (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, name VARCHAR(60) NOT NULL, code VARCHAR(10), annual_quota DECIMAL(5,1) DEFAULT 0, paid BOOLEAN DEFAULT true, active BOOLEAN DEFAULT true, sort_order INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE TABLE IF NOT EXISTS leave_requests (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, user_id UUID REFERENCES users(id) ON DELETE CASCADE, leave_type_id UUID REFERENCES leave_types(id), start_date DATE NOT NULL, end_date DATE NOT NULL, half_day BOOLEAN DEFAULT false, days DECIMAL(5,1) NOT NULL, reason TEXT, status VARCHAR(20) DEFAULT 'Pending' CHECK (status IN ('Pending','Approved','Rejected','Cancelled')), reviewed_by UUID REFERENCES users(id), review_comment TEXT, reviewed_at TIMESTAMP, created_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE TABLE IF NOT EXISTS leave_adjustments (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, user_id UUID REFERENCES users(id) ON DELETE CASCADE, leave_type_id UUID REFERENCES leave_types(id), year INTEGER NOT NULL, delta_days DECIMAL(5,1) NOT NULL, note TEXT, created_by UUID REFERENCES users(id), created_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE INDEX IF NOT EXISTS idx_leave_requests_tenant ON leave_requests(tenant_id, start_date DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_leave_requests_user ON leave_requests(user_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_leave_types_tenant ON leave_types(tenant_id)`,
+    `INSERT INTO leave_types (tenant_id, name, code, annual_quota, paid, sort_order)
+     SELECT t.id, v.name, v.code, v.quota, v.paid, v.sort_order
+     FROM tenants t
+     CROSS JOIN (VALUES
+       ('Casual Leave','CL',12.0,true,1),
+       ('Sick Leave','SL',8.0,true,2),
+       ('Earned Leave','EL',15.0,true,3),
+       ('Leave Without Pay','LWP',0.0,false,4)
+     ) AS v(name, code, quota, paid, sort_order)
+     WHERE NOT EXISTS (SELECT 1 FROM leave_types lt WHERE lt.tenant_id = t.id)`,
+    // Shifts: per-date assignment rows (like visits materialization) — no recurrence engine.
+    `CREATE TABLE IF NOT EXISTS shift_templates (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, name VARCHAR(80) NOT NULL, start_time TIME NOT NULL, end_time TIME NOT NULL, days_of_week JSONB DEFAULT '[1,2,3,4,5,6]', color VARCHAR(7) DEFAULT '#1d4ed8', active BOOLEAN DEFAULT true, created_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE TABLE IF NOT EXISTS shift_assignments (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, user_id UUID REFERENCES users(id) ON DELETE CASCADE, shift_template_id UUID REFERENCES shift_templates(id) ON DELETE CASCADE, date DATE NOT NULL, created_by UUID REFERENCES users(id), created_at TIMESTAMP DEFAULT NOW(), UNIQUE(user_id, date))`,
+    `CREATE INDEX IF NOT EXISTS idx_shift_assignments_tenant_date ON shift_assignments(tenant_id, date)`,
+    // Timesheets: computed on read; a row here is the approval snapshot/lock for one user+period.
+    `CREATE TABLE IF NOT EXISTS timesheets (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, user_id UUID REFERENCES users(id) ON DELETE CASCADE, period_start DATE NOT NULL, period_end DATE NOT NULL, attendance_hours DECIMAL(6,1) DEFAULT 0, activity_hours DECIMAL(6,1) DEFAULT 0, regular_hours DECIMAL(6,1) DEFAULT 0, overtime_hours DECIMAL(6,1) DEFAULT 0, approved_by UUID REFERENCES users(id), approved_at TIMESTAMP DEFAULT NOW(), UNIQUE(user_id, period_start))`,
+    `CREATE INDEX IF NOT EXISTS idx_timesheets_tenant ON timesheets(tenant_id, period_start DESC)`,
+    // Tasks (kanban) — standalone or under a project.
+    `CREATE TABLE IF NOT EXISTS tasks (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, project_id UUID REFERENCES projects(id) ON DELETE SET NULL, title VARCHAR(200) NOT NULL, description TEXT, assignee_id UUID REFERENCES users(id), created_by UUID REFERENCES users(id), status VARCHAR(20) DEFAULT 'todo' CHECK (status IN ('todo','in_progress','review','done')), priority VARCHAR(10) DEFAULT 'Medium' CHECK (priority IN ('Low','Medium','High','Urgent')), due_date DATE, checklist JSONB DEFAULT '[]', position INTEGER DEFAULT 0, completed_at TIMESTAMP, created_at TIMESTAMP DEFAULT NOW(), updated_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE INDEX IF NOT EXISTS idx_tasks_tenant_status ON tasks(tenant_id, status, position)`,
+    `CREATE INDEX IF NOT EXISTS idx_tasks_assignee ON tasks(assignee_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_tasks_due ON tasks(tenant_id, due_date)`,
+    // Payroll: pragmatic v1 — no statutory tax math; PF/ESI/TDS are manual line items.
+    `CREATE TABLE IF NOT EXISTS salary_structures (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, user_id UUID UNIQUE REFERENCES users(id) ON DELETE CASCADE, monthly_base DECIMAL(12,2) DEFAULT 0, line_items JSONB DEFAULT '[]', effective_from DATE, created_at TIMESTAMP DEFAULT NOW(), updated_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE TABLE IF NOT EXISTS payroll_runs (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, month VARCHAR(7) NOT NULL, working_days INTEGER NOT NULL, status VARCHAR(20) DEFAULT 'Draft' CHECK (status IN ('Draft','Finalized')), notes TEXT, created_by UUID REFERENCES users(id), finalized_at TIMESTAMP, created_at TIMESTAMP DEFAULT NOW(), UNIQUE(tenant_id, month))`,
+    `CREATE TABLE IF NOT EXISTS payslips (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, payroll_run_id UUID REFERENCES payroll_runs(id) ON DELETE CASCADE, user_id UUID REFERENCES users(id) ON DELETE CASCADE, monthly_base DECIMAL(12,2) DEFAULT 0, line_items JSONB DEFAULT '[]', lop_days DECIMAL(4,1) DEFAULT 0, lop_amount DECIMAL(12,2) DEFAULT 0, gross DECIMAL(12,2) DEFAULT 0, deductions_total DECIMAL(12,2) DEFAULT 0, net_pay DECIMAL(12,2) DEFAULT 0, created_at TIMESTAMP DEFAULT NOW(), UNIQUE(payroll_run_id, user_id))`,
+    `CREATE INDEX IF NOT EXISTS idx_payslips_user ON payslips(user_id)`,
   ];
   for (const sql of stmts) {
     await db.query(sql).catch(e => console.warn('Migration warning:', e.message));
@@ -154,6 +206,12 @@ app.use('/api/public', publicRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/assignments', assignmentsRoutes);
 app.use('/api/support-tickets', supportTicketsRoutes);
+app.use('/api/attendance', attendanceRoutes);
+app.use('/api/leave', leaveRoutes);
+app.use('/api/shifts', shiftsRoutes);
+app.use('/api/timesheets', timesheetsRoutes);
+app.use('/api/tasks', tasksRoutes);
+app.use('/api/payroll', payrollRoutes);
 
 app.get('/api/health', async (req, res) => {
   const start = Date.now();

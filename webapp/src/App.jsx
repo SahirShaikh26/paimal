@@ -24,6 +24,13 @@ const Booking = lazy(() => import('./pages/Booking'));
 const Assignments = lazy(() => import('./pages/Assignments'));
 const Variance = lazy(() => import('./pages/Variance'));
 const SupportTickets = lazy(() => import('./pages/SupportTickets'));
+const Attendance = lazy(() => import('./pages/Attendance'));
+const Leave = lazy(() => import('./pages/Leave'));
+const Shifts = lazy(() => import('./pages/Shifts'));
+const Timesheets = lazy(() => import('./pages/Timesheets'));
+const Tasks = lazy(() => import('./pages/Tasks'));
+const Payroll = lazy(() => import('./pages/Payroll'));
+const Payslips = lazy(() => import('./pages/Payslips'));
 
 function RequireAuth({ children }) {
   const { isLoggedIn } = useAuth();
@@ -60,6 +67,13 @@ export default function App() {
             <Route path="variance" element={<Variance />} />
             <Route path="quotes" element={<Quotes />} />
             <Route path="invoices" element={<Invoices />} />
+            <Route path="attendance" element={<Attendance />} />
+            <Route path="leave" element={<Leave />} />
+            <Route path="shifts" element={<Shifts />} />
+            <Route path="timesheets" element={<Timesheets />} />
+            <Route path="tasks" element={<Tasks />} />
+            <Route path="payroll" element={<Payroll />} />
+            <Route path="payslips" element={<Payslips />} />
             <Route path="settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
