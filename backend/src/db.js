@@ -1,6 +1,12 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
+// On Vercel every warm function instance keeps its own pool, and there can be
+// many instances at once — so each one holds a single connection and gives it up
+// quickly, or they collectively exhaust Supabase's pooler. A long-running server
+// has no such competition and gets the normal pool.
+const serverless = !!process.env.VERCEL;
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   // Managed Postgres hosts (Supabase, some Railway plans) require SSL. Enable it
@@ -9,6 +15,7 @@ const pool = new Pool({
   ssl: /supabase|sslmode=require/.test(process.env.DATABASE_URL || '')
     ? { rejectUnauthorized: false }
     : false,
+  ...(serverless ? { max: 1, idleTimeoutMillis: 10_000, connectionTimeoutMillis: 15_000 } : {}),
 });
 
 // A pooled connection dropped while idle (managed poolers do this routinely)
