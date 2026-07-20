@@ -94,9 +94,9 @@ export default function Login() {
             <label style={s.label}>Your Name</label>
             <input style={s.input} value={adminName} onChange={e => setAdminName(e.target.value)} required placeholder="John Smith" />
             <label style={s.label}>Admin Email</label>
-            <input style={s.input} type="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} required placeholder="john@acme.com" />
+            <input style={s.input} type="email" autoComplete="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} required placeholder="john@acme.com" />
             <label style={s.label}>Password</label>
-            <input style={s.input} type="password" value={regPassword} onChange={e => setRegPassword(e.target.value)} required placeholder="Min 8 characters" minLength={8} />
+            <input style={s.input} type="password" autoComplete="new-password" value={regPassword} onChange={e => setRegPassword(e.target.value)} required placeholder="Min 8 characters" minLength={8} />
             <button style={s.btn} type="submit" disabled={loading}>
               {loading ? 'Registering…' : 'Create Account'}
             </button>
@@ -119,9 +119,9 @@ export default function Login() {
         <div style={s.tagline}>Kaam ka gyaan ho, sahi pehchaan ho!</div>
         <form onSubmit={handleLogin}>
           <label style={s.label}>Email</label>
-          <input style={s.input} type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@company.com" />
+          <input style={s.input} type="email" autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@company.com" />
           <label style={s.label}>Password</label>
-          <input style={s.input} type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
+          <input style={s.input} type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
           <button style={s.btn} type="submit" disabled={loading}>
             {loading ? 'Signing in…' : 'Sign In'}
           </button>
