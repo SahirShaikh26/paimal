@@ -47,3 +47,25 @@ for (const r of ROUTES) {
   fs.writeFileSync(outPath, html);
   console.log('prerendered', r.path, '->', r.out);
 }
+
+// Sitemap is generated from the same ROUTES list that produced the pages, so a
+// new route can never be prerendered without also being announced to crawlers.
+// /privacy is a hand-written static file, so it's appended separately.
+const SITE = 'https://paimal.com';
+const lastmod = new Date().toISOString().slice(0, 10);
+const urls = [
+  ...ROUTES.map((r) => ({ loc: SITE + r.path, priority: r.path === '/' ? '1.0' : '0.8' })),
+  { loc: SITE + '/privacy', priority: '0.3' },
+];
+
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((u) => `  <url>
+    <loc>${u.loc}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <priority>${u.priority}</priority>
+  </url>`).join('\n')}
+</urlset>
+`;
+fs.writeFileSync(abs('dist/sitemap.xml'), sitemap);
+console.log('wrote sitemap.xml with', urls.length, 'urls');

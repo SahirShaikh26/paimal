@@ -27,6 +27,67 @@
     <meta name="twitter:description" content="Scheduling, attendance, jobs, customers, billing and payments — plus an AI digest that writes your reports. Built for field service teams. Free 14-day trial." />
     <meta name="twitter:image" content="https://paimal.com/og-image.png" />
 
+    <!-- Structured data: lets search engines show Paimal as a product with
+         pricing rather than a plain blue link. Prices are per seat per month
+         and mirror src/components/Pricing.jsx — keep the two in step. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://paimal.com/#organization",
+          "name": "Paimal",
+          "url": "https://paimal.com/",
+          "logo": "https://paimal.com/og-image.png",
+          "description": "Field service management software for teams that dispatch technicians.",
+          "email": "hello@paimal.com",
+          "areaServed": "IN"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://paimal.com/#website",
+          "url": "https://paimal.com/",
+          "name": "Paimal",
+          "publisher": { "@id": "https://paimal.com/#organization" }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Paimal",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web, Android",
+          "url": "https://paimal.com/",
+          "publisher": { "@id": "https://paimal.com/#organization" },
+          "description": "Scheduling, attendance, jobs, customers, billing and payments for field service teams, plus an AI daily digest.",
+          "featureList": [
+            "Job scheduling and dispatch",
+            "GPS attendance and check-ins",
+            "Customer and asset history",
+            "Quotes, invoices and online payments",
+            "Offline-capable mobile app",
+            "AI daily digest and anomaly detection"
+          ],
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Starter",
+              "price": "399",
+              "priceCurrency": "INR",
+              "description": "Per seat per month, billed monthly. Up to 5 seats."
+            },
+            {
+              "@type": "Offer",
+              "name": "Pro",
+              "price": "299",
+              "priceCurrency": "INR",
+              "description": "Per seat per month, billed monthly. Up to 25 seats."
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
     <!-- No-JS / crawler fallback: ensure scroll-reveal sections are visible without JS. -->
     <noscript><style>.reveal{opacity:1 !important;transform:none !important}</style></noscript>
   </head>

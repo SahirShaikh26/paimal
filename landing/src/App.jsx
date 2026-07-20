@@ -11,11 +11,14 @@ import Industries from './pages/Industries';
 export default function App() {
   return (
     <>
+      <a className="skip-link" href="#main">Skip to content</a>
       <Nav />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/industries" element={<Industries />} />
-      </Routes>
+      <main id="main">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/industries" element={<Industries />} />
+        </Routes>
+      </main>
       <Footer />
     </>
   );

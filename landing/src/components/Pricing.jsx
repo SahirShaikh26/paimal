@@ -56,6 +56,8 @@ export default function Pricing() {
           <button
             onClick={() => setAnnual((a) => !a)}
             aria-label="Toggle annual billing"
+            aria-pressed={annual}
+            className="billing-toggle"
             style={{
               width: 46, height: 26, borderRadius: 20, border: 'none', cursor: 'pointer',
               background: annual ? '#201C16' : '#DCD4C6',

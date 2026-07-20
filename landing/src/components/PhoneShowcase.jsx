@@ -58,7 +58,7 @@ export default function PhoneShowcase() {
               <div className="showcase-point" key={pt.h}>
                 <span className="sp-ic"><ColorIcon name={pt.icon} size={30} /></span>
                 <span>
-                  <h4>{pt.h}</h4>
+                  <h3>{pt.h}</h3>
                   <p>{pt.p}</p>
                 </span>
               </div>

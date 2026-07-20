@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# The app itself is behind a login and has nothing to index.
+Disallow: /download/
+
+Sitemap: https://paimal.com/sitemap.xml

@@ -116,7 +116,7 @@ export default function HowItWorks() {
             <Reveal as="div" className="setup-item" key={it.h}>
               <span className="si-ic"><Icon name={it.ic} size={22} /></span>
               <span>
-                <h4>{it.h}</h4>
+                <h3>{it.h}</h3>
                 <p>{it.p}</p>
               </span>
             </Reveal>
