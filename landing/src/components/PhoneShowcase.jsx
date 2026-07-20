@@ -1,7 +1,8 @@
-import { ANDROID_DOWNLOAD_URL, ANDROID_ON_PLAY_STORE, SIGNUP_URL } from '../config';
+import { ANDROID_DOWNLOAD_URL, ANDROID_ON_PLAY_STORE, SIGNUP_URL, WEBAPP_URL } from '../config';
 import Icon from './Icon';
 import ColorIcon from './ColorIcon';
 import Reveal from './Reveal';
+import usePlatform from '../hooks/usePlatform';
 
 const JOBS = [
   { dot: '#3F8F5B', jt: 'AC service — Andheri', js: '10:00 AM · Rajesh', badge: 'Now', bg: '#DCF0E6', fg: '#2E6E44' },
@@ -16,6 +17,7 @@ const POINTS = [
 ];
 
 export default function PhoneShowcase() {
+  const platform = usePlatform();
   return (
     <section className="section showcase has-ambient" id="mobile-app">
       <div className="ambient" aria-hidden="true"><span className="a1" /><span className="a2" /></div>
@@ -66,18 +68,26 @@ export default function PhoneShowcase() {
           </div>
           <div className="showcase-cta">
             <a href={SIGNUP_URL} className="btn btn-glow btn-lg">Start Free Trial <Icon name="arrow" /></a>
-            <a
-              href={ANDROID_DOWNLOAD_URL}
-              className="btn btn-ghost btn-lg"
-              {...(ANDROID_ON_PLAY_STORE ? { target: '_blank', rel: 'noopener' } : { download: true })}
-            >
-              <Icon name="android" /> Download for Android
-            </a>
+            {platform === 'ios' ? (
+              <a href={WEBAPP_URL} className="btn btn-ghost btn-lg" target="_blank" rel="noopener">
+                <Icon name="mobile" /> Open the web app
+              </a>
+            ) : (
+              <a
+                href={ANDROID_DOWNLOAD_URL}
+                className="btn btn-ghost btn-lg"
+                {...(ANDROID_ON_PLAY_STORE ? { target: '_blank', rel: 'noopener' } : { download: true })}
+              >
+                <Icon name="android" /> Download for Android
+              </a>
+            )}
           </div>
           <p className="showcase-note">
-            {ANDROID_ON_PLAY_STORE
-              ? 'Free on Google Play. Sign in with your Paimal account.'
-              : 'Android APK · sign in with your Paimal account. Your phone will ask you to allow installs from your browser — that’s expected for apps downloaded outside the Play Store.'}
+            {platform === 'ios'
+              ? 'On iPhone, open Paimal in Safari and tap Share → “Add to Home Screen” to install it like an app. Sign in with your Paimal account.'
+              : ANDROID_ON_PLAY_STORE
+                ? 'Free on Google Play for Android. On iPhone or desktop, open the web app and add it to your home screen. Sign in with your Paimal account.'
+                : 'Android APK · sign in with your Paimal account. Your phone will ask you to allow installs from your browser — that’s expected outside the Play Store. On iPhone or desktop, open the web app and add it to your home screen instead.'}
           </p>
         </Reveal>
       </div>

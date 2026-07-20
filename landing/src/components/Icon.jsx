@@ -20,6 +20,7 @@ const PATHS = {
   clock: ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z', 'M12 7v5l3 2'],
   download: ['M12 3v12', 'M7.5 10.5L12 15l4.5-4.5', 'M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2'],
   android: ['M6 10.5v6a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-6', 'M6 10.5a6 6 0 0 1 12 0', 'M8.5 7.5L7 5.5M15.5 7.5L17 5.5', 'M10 9h.01M14 9h.01', 'M4 11.5v4M20 11.5v4', 'M9.5 17.5v2M14.5 17.5v2'],
+  mobile: ['M7 3h10a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z', 'M10 18h4'],
 };
 
 export default function Icon({ name, size = 22, stroke = 1.7, style, ...rest }) {
