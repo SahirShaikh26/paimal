@@ -1,4 +1,4 @@
-import { ANDROID_DOWNLOAD_URL, ANDROID_ON_PLAY_STORE, SIGNUP_URL, WEBAPP_URL } from '../config';
+import { ANDROID_ON_PLAY_STORE, PLAY_STORE_URL, SIGNUP_URL, WEBAPP_URL } from '../config';
 import Icon from './Icon';
 import ColorIcon from './ColorIcon';
 import Reveal from './Reveal';
@@ -68,26 +68,24 @@ export default function PhoneShowcase() {
           </div>
           <div className="showcase-cta">
             <a href={SIGNUP_URL} className="btn btn-glow btn-lg">Start Free Trial <Icon name="arrow" /></a>
-            {platform === 'ios' ? (
-              <a href={WEBAPP_URL} className="btn btn-ghost btn-lg" target="_blank" rel="noopener">
-                <Icon name="mobile" /> Open the web app
+            {ANDROID_ON_PLAY_STORE && platform === 'android' ? (
+              <a href={PLAY_STORE_URL} className="btn btn-ghost btn-lg" target="_blank" rel="noopener">
+                <Icon name="android" /> Get it on Google Play
               </a>
             ) : (
-              <a
-                href={ANDROID_DOWNLOAD_URL}
-                className="btn btn-ghost btn-lg"
-                {...(ANDROID_ON_PLAY_STORE ? { target: '_blank', rel: 'noopener' } : { download: true })}
-              >
-                <Icon name="android" /> Download for Android
+              <a href={WEBAPP_URL} className="btn btn-ghost btn-lg" target="_blank" rel="noopener">
+                <Icon name="mobile" /> Open the web app
               </a>
             )}
           </div>
           <p className="showcase-note">
             {platform === 'ios'
               ? 'On iPhone, open Paimal in Safari and tap Share → “Add to Home Screen” to install it like an app. Sign in with your Paimal account.'
-              : ANDROID_ON_PLAY_STORE
-                ? 'Free on Google Play for Android. On iPhone or desktop, open the web app and add it to your home screen. Sign in with your Paimal account.'
-                : 'Android APK · sign in with your Paimal account. Your phone will ask you to allow installs from your browser — that’s expected outside the Play Store. On iPhone or desktop, open the web app and add it to your home screen instead.'}
+              : platform === 'android'
+                ? (ANDROID_ON_PLAY_STORE
+                    ? 'Get the Android app from Google Play, or install the web app to your home screen. Sign in with your Paimal account.'
+                    : 'The Android app is coming to Google Play soon. For now, open the web app and add it to your home screen from your browser menu. Sign in with your Paimal account.')
+                : 'Runs in any modern browser — install it to your home screen or desktop for an app-like experience. The Android app is coming to Google Play soon. Sign in with your Paimal account.'}
           </p>
         </Reveal>
       </div>

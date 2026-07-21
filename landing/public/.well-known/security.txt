@@ -1,0 +1,8 @@
+# https://securitytxt.org/  (RFC 9116)
+# Paimal is a legitimate field-service management SaaS operated for Indian
+# businesses. If you believe this domain has been misclassified or flagged,
+# please contact us at the address below.
+Contact: mailto:support@paimal.com
+Expires: 2027-07-21T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://paimal.com/.well-known/security.txt
