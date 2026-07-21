@@ -21,10 +21,11 @@ export default function Footer() {
             <a href={LOGIN_URL}>Log In</a>
             <a href={SIGNUP_URL}>Start Free Trial</a>
             <a href="/privacy.html">Privacy Policy</a>
+            <a href="/terms.html">Terms</a>
             <a href={`mailto:${CONTACT_EMAIL}`}>Contact</a>
           </div>
         </div>
-        <div className="footer-bottom">© {year} Paimal. All rights reserved.</div>
+        <div className="footer-bottom">© {year} Paimal · Field service management software · <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: 'inherit' }}>{CONTACT_EMAIL}</a></div>
       </div>
     </footer>
   );
