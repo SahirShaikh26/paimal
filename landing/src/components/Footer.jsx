@@ -25,7 +25,7 @@ export default function Footer() {
             <a href={`mailto:${CONTACT_EMAIL}`}>Contact</a>
           </div>
         </div>
-        <div className="footer-bottom">© {year} Paimal · Field service management software · <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: 'inherit' }}>{CONTACT_EMAIL}</a></div>
+        <div className="footer-bottom">© {year} Paimal by SRS Associates · Field service management software · <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: 'inherit' }}>{CONTACT_EMAIL}</a></div>
       </div>
     </footer>
   );
