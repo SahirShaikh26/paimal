@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
+import Analytics from './components/Analytics';
 import Home from './pages/Home';
 import Industries from './pages/Industries';
 
@@ -11,6 +12,7 @@ import Industries from './pages/Industries';
 export default function App() {
   return (
     <>
+      <Analytics />
       <a className="skip-link" href="#main">Skip to content</a>
       <Nav />
       <main id="main">
