@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import api from '../api/client';
 import colors from '../theme';
 import LineItemEditor from '../components/LineItemEditor';
+import RazorpayButton from '../components/RazorpayButton';
 
 const STATUS_BG = { Draft: colors.bgAlt, Sent: colors.blueBg, Paid: colors.greenBg, Overdue: colors.redBg, Cancelled: colors.bgAlt };
 const STATUS_TEXT = { Draft: colors.textMuted, Sent: colors.blueDark, Paid: colors.green, Overdue: colors.red, Cancelled: colors.textMuted };
@@ -138,6 +139,14 @@ export default function Invoices() {
               {inv.status !== 'Paid' && inv.status !== 'Cancelled' && (
                 <>
                   <button style={s.link} onClick={() => handleEdit(inv)}>Edit</button>
+                  <RazorpayButton
+                    invoiceId={inv.id}
+                    description={`Invoice ${inv.invoice_number}`}
+                    prefill={{ name: inv.customer_name, email: inv.contact_email }}
+                    onPaid={() => qc.invalidateQueries({ queryKey: ['invoices'] })}
+                    label="Pay Now"
+                    style={{ ...s.link, color: colors.green }}
+                  />
                   <button style={{ ...s.link, color: colors.purple }} onClick={() => payLink.mutate(inv.id)} disabled={payLink.isPending}>
                     {inv.razorpay_payment_link_url ? 'Resend Link' : 'Payment Link'}
                   </button>
