@@ -24,6 +24,12 @@ export default function Status() {
     refetchInterval: 60000,
   });
 
+  const { data: acc } = useQuery({
+    queryKey: ['status-accounts'],
+    queryFn: () => api.get('/status/accounts').then((r) => r.data),
+    refetchInterval: 60000,
+  });
+
   if (error) {
     return <p style={{ color: colors.red }}>Could not load status — you may not have owner access.</p>;
   }
@@ -31,7 +37,55 @@ export default function Status() {
   return (
     <div>
       <h1 style={s.h1}>System Status</h1>
-      <p style={s.sub}>Platform-wide error overview across all tenants</p>
+      <p style={s.sub}>Platform-wide account &amp; error overview across all tenants</p>
+
+      {acc && (
+        <>
+          <div style={s.grid}>
+            <div style={card}><div style={s.statValue}>{acc.tenants.total}</div><div style={s.statLabel}>Total accounts (companies)</div></div>
+            <div style={card}><div style={{ ...s.statValue, color: colors.green }}>{acc.tenants.active_30d}</div><div style={s.statLabel}>Active in last 30 days</div></div>
+            <div style={card}><div style={s.statValue}>{acc.tenants.new_30d}</div><div style={s.statLabel}>New accounts (30 days)</div></div>
+            <div style={card}><div style={s.statValue}>{acc.users.total}</div><div style={s.statLabel}>Total users</div></div>
+          </div>
+
+          <div style={{ ...card, marginBottom: 20 }}>
+            <h3 style={s.sectionTitle}>Accounts</h3>
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 16, fontSize: 13, color: colors.textMuted }}>
+              <span>By status:&nbsp;{acc.tenants.by_status.map((r) => `${r.plan_status} ${r.count}`).join(' · ')}</span>
+              <span>By plan:&nbsp;{acc.tenants.by_plan.map((r) => `${r.plan} ${r.count}`).join(' · ')}</span>
+              <span>By role:&nbsp;{acc.users.by_role.map((r) => `${r.role} ${r.count}`).join(' · ')}</span>
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={s.table}>
+                <thead>
+                  <tr>
+                    <th style={s.th}>Company</th>
+                    <th style={s.th}>Plan</th>
+                    <th style={s.th}>Status</th>
+                    <th style={s.th}>Users</th>
+                    <th style={s.th}>Last activity</th>
+                    <th style={s.th}>Joined</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {acc.list.map((t) => (
+                    <tr key={t.slug}>
+                      <td style={s.td}>{t.name}{!t.active && <span style={{ color: colors.red }}> (inactive)</span>}</td>
+                      <td style={s.td}>{t.plan}</td>
+                      <td style={s.td}>{t.plan_status}</td>
+                      <td style={s.td}>{t.users}</td>
+                      <td style={s.td}>{t.last_activity ? format(new Date(t.last_activity), 'MMM d, yyyy') : '—'}</td>
+                      <td style={s.td}>{format(new Date(t.created_at), 'MMM d, yyyy')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+
+      <h3 style={{ ...s.sectionTitle, fontSize: 17, marginTop: 8 }}>Errors</h3>
 
       {isLoading ? <p>Loading…</p> : (
         <>
